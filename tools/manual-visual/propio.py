@@ -13,9 +13,9 @@ inicio = pagina("Qué elegir al abrir Padel al Tanto",
     "Al entrar, busca la fila que necesitas. Estos tres accesos están en la pantalla de inicio.",
     [
         ("home", (130,83), "Jugar · Empieza un partido",
-         "Elige Jugar para preparar el primer saque. El reloj empieza a grabar cuando confirmes el inicio en la pantalla siguiente."),
-        ("home", ("touch",130,122,(56,13)), "Plantillas · Elige cómo puntuar",
-         "Entra aquí para elegir sets o americano, punto de oro, ventajas o Solo juegos. Puedes guardar tus combinaciones con un nombre."),
+         "En Jugar, elige una plantilla o configura el partido en Manual. Después elige quién saca y confirma para empezar a grabar."),
+        ("home", ("touch",130,122,(56,13)), "Plantillas · Gestiona tus formatos",
+         "Entra aquí para crear, editar o eliminar configuraciones. Las que guardes estarán disponibles en Jugar."),
         ("home", ("touch",130,161,(47,13)), "Ajustes · Preferencias de la app",
          "Desde esta opción puedes cambiar el táctil o el idioma y activar la detección de golpes. BACK regresa al inicio."),
     ], "Si ya guardaste una actividad con anotaciones, verás también «Última sesión». Con los toques activos puedes abrir cualquier opción tocando su fila.")
@@ -40,24 +40,24 @@ bloquear = pagina("Desactiva el táctil en pleno partido",
          "Ajustes es la primera opción y al entrar ya está resaltada. Pulsa otra vez el botón superior derecho."),
         ("enabled", ("touch",130,83,(95,14)), "Toca la fila Pantalla táctil",
          "El estado pasa de «Sí» a «No». También puedes cambiarlo con START sobre esa fila. A partir de aquí usa los botones físicos."),
-    ], "Pulsa BACK dos veces, una para salir de Ajustes y otra para cerrar el menú. Verás «Táctil no». Los toques y los deslizamientos quedan bloqueados.")
+    ], "Pulsa BACK dos veces para regresar al marcador. Los signos − desaparecen y puedes seguir anotando con los botones.")
 
 activar = pagina("Reactiva el táctil solo con botones",
-    "Empieza en el marcador donde pone «Táctil no». Para reactivarlo basta con tres pulsaciones de START.",
+    "Si faltan los signos − del marcador, puedes reactivar el táctil de la app con tres pulsaciones de START.",
     [
         ("blocked", "START", "Primera pulsación · Abre el menú",
          "Pulsa el botón superior derecho. El partido sigue grabándose aunque la pantalla ignore los toques."),
         ("match_menu", "START", "Segunda pulsación · Abre Ajustes",
          "Pulsa START sobre Ajustes. La fila «Pantalla táctil» aparece seleccionada y su estado es «No»."),
         ("disabled", "START", "Tercera pulsación · Activa el táctil",
-         "Pulsa START sobre «Pantalla táctil» y lee «Sí». Pulsa BACK dos veces para regresar al marcador. Abajo verás «Táctil sí»."),
+         "Pulsa START sobre «Pantalla táctil» y lee «Sí». Regresa al marcador con dos pulsaciones de BACK y verás los signos − de nuevo."),
     ], "Suelta START entre las tres pulsaciones. Una cuarta pulsación, si sigues en Ajustes, vuelve a desactivar el táctil. La preferencia se conserva al cerrar la app.")
 
 gesto = pagina("Deshaz un punto deslizando el dedo",
     "Este ejemplo empieza en 30–30. Rivales, la pareja de abajo, acaba de ganar el último punto.",
     [
-        ("play30", ("read",109,217), "Comprueba que dice Táctil sí",
-         "Mira la línea pequeña bajo las dos cifras. Si pone «Táctil no», sigue la página anterior para activarlo."),
+        ("play30", ("read",36,85,(17,17)), "Busca el signo − junto al tanteo",
+         "Los signos − indican que el táctil de la app está activo. Si faltan, sigue la página anterior para activarlo."),
         ("play30", ("left",), "Arrastra del borde derecho al izquierdo",
          "Apoya el dedo dentro del borde derecho de la esfera y, sin levantarlo, cruza el marcador hacia la izquierda. Levántalo al final."),
         ("play15", ("read",102,173), "Comprueba que Rivales baja a 15",
@@ -114,7 +114,7 @@ ayuda = pagina("Si el reloj no responde como esperabas",
         ("enabled", ("read",130,83,(95,14)), "La fila dice «Sí» y faltan los toques",
          "Desde la esfera de Garmin, mantén MENU y abre Sistema > Táctil. Comprueba que esté permitido durante la actividad. En Padel al Tanto puedes usar los botones en todo momento."),
         ("serve", "START", "Si aparece «Error al iniciar»",
-         "Comprueba que puedes iniciar una actividad y que hay espacio en el reloj. Vuelve a Primer saque y pulsa START. Espera a ver el marcador antes de anotar."),
+         "Comprueba que puedes iniciar una actividad y que hay espacio en el reloj. Vuelve a Primer saque y pulsa START sobre Iniciar. Espera a ver el marcador antes de anotar."),
         ("storage_full", (130,130), "Si al editar sale «Sin espacio»",
          "Toca Volver o pulsa BACK. Revisa la lista de plantillas. Si has llegado al límite, puedes quitar una que ya no uses y volver a guardar."),
     ], "Si el aviso dice «Error al guardar» al finalizar una actividad, hay una pantalla específica para reintentar el guardado. La encontrarás en el índice.")

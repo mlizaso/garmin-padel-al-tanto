@@ -1,5 +1,5 @@
 Padel al Tanto
-Connect IQ · Device App · Gratis · 0.8.0
+Connect IQ · Device App · Gratis · 0.9.0
 Contacto: opción de contacto con el desarrollador en Connect IQ
 Política de privacidad: Privacidad.html
 
@@ -15,7 +15,7 @@ Lleva el marcador de pádel en tu reloj. Anota cada punto o solo los juegos con 
 Compatible con Garmin fēnix 7 y fēnix 7 Pro de 47 mm, incluida la edición Pro Sapphire Solar. El marcador funciona en el reloj durante el partido. Si tu reloj está en español, la app se abre en español. Para los demás idiomas se abre en inglés. Puedes cambiarlo en Ajustes → Idioma, incluso durante el partido.
 
 Novedades
-La detección de golpes con el movimiento de la muñeca está desactivada por defecto. Puedes activarla desde Ajustes incluso durante el partido. El reloj recuerda tu elección.
+En Jugar, selecciona una plantilla o configura el partido en Manual antes de elegir quién saca. En Plantillas puedes crear, editar y eliminar formatos. Si jugáis al mejor de tres, podéis sustituir el tercer set por un súper tie-break a diez con dos de ventaja. El marcador muestra la hora local y el tiempo total desde el inicio.
 
 ENGLISH
 
@@ -29,4 +29,4 @@ Keep your padel score on your watch. Use the touchscreen or buttons to score eac
 Compatible with 47 mm Garmin fēnix 7 and fēnix 7 Pro models, including the Pro Sapphire Solar edition. Scoring runs on the watch during play. The app starts in Spanish on a Spanish-language watch and in English on all other watches. You can change this in Settings → Language, even during a match.
 
 What's New
-Wrist-based stroke detection is off by default. You can turn it on in Settings, including during a match. The watch remembers your choice.
+Under Play, pick a template or configure a match manually, then choose the first serving pair. Use Templates to create, edit and delete saved formats. In a best-of-three match you can replace the third set with a ten-point match tiebreak, won by two. The scoreboard shows local time and elapsed match time.

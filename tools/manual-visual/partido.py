@@ -1,26 +1,26 @@
 pages = [
     {
         "title": "Iniciar y elegir el primer saque",
-        "intro": "Decide qué pareja saca primero antes de que empiece el partido.",
+        "intro": "Prepara el formato del partido y elige quién saca primero antes de iniciar la grabación.",
         "steps": [
             ("home", (130, 83), "Abre Jugar",
-             "Toca «Jugar» o selecciónalo con UP y DOWN y pulsa START. Se abre «Primer saque»."),
+             "Toca «Jugar» o selecciónalo con UP y DOWN y pulsa START. Elige una plantilla o entra en «Manual» para configurar el partido."),
             ("serve", "UP", "Elige quién empieza",
              "Pulsa UP si sacáis vosotros o DOWN si sacan los rivales. También puedes tocar la opción. El símbolo › marca tu elección."),
             ("serve", "START", "Empieza a jugar",
              "Revisa el formato y la regla que muestra la pantalla. Pulsa START o toca «Iniciar» para abrir el marcador y comenzar a grabar."),
         ],
-        "tip": "Si quieres regresar al inicio desde «Primer saque», pulsa BACK.",
+        "tip": "Desde «Primer saque», pulsa BACK para cambiar de plantilla o revisar los ajustes manuales.",
     },
     {
         "title": "Leer un 30–30 y sumar con un toque",
-        "intro": "La fila amarilla marcada «SAQUE» identifica a la pareja que sirve. En este ejemplo, la detección de golpes está activada.",
+        "intro": "La fila amarilla marcada «SAQUE» identifica a la pareja que sirve. Las cifras grandes son los puntos y a la derecha se ven los juegos y los sets.",
         "steps": [
-            ("play30", ('read', 182, 54), "Lee las dos filas",
-             'En este ejemplo saca nuestra pareja y vamos 30–30. Las cifras grandes son los puntos del juego. A la derecha ves los juegos y los sets de cada pareja.'),
-            ("play30", (101, 85), "Si ganáis vosotros, toca arriba",
+            ("play30_strokes_off", ("read", 130, 216, (84, 10)), "Consulta la hora y la duración",
+             "El reloj blanco muestra la hora local. El cronómetro amarillo muestra el tiempo desde que empezó la grabación. Sigue avanzando en los menús y entre rondas de americano."),
+            ("play30_strokes_off", (101, 85), "Si ganáis vosotros, toca arriba",
              "Toca el 30 de Nosotros. El marcador queda 40–30. El centro de la cifra es la zona para sumar."),
-            ("play30", (101, 174), "Si ganan los rivales, toca abajo",
+            ("play30_strokes_off", (101, 174), "Si ganan los rivales, toca abajo",
              "Como alternativa, desde el mismo 30–30 toca el 30 de Rivales. El tanteo queda 30–40."),
         ],
         "tip": "Anota una vez por punto. Lee el nombre de la pareja junto a la cifra antes de tocarla.",
@@ -90,7 +90,7 @@ pages = [
     },
     {
         "title": "Anotar solo los juegos",
-        "intro": "En el modo Solo juegos, la cifra grande de cada fila muestra los juegos ganados.",
+        "intro": "Durante un set o una ronda en Solo juegos, la cifra grande de cada fila muestra los juegos ganados.",
         "steps": [
             ("solo", (101, 174), "Marca al ganador del juego",
              "Espera a que termine el juego y toca la cifra de quien ganó. Si ganáis vosotros en este ejemplo, toca el 3 o pulsa DOWN."),
@@ -112,7 +112,7 @@ pages = [
             ("solo_tie", ('read', 129, 130), "En Solo juegos, marca un ganador",
              "En 6–6 aparece «Desempate · anota el ganador». Jugad el desempate en pista y marca una sola vez la pareja ganadora. El ganador cierra el set con siete juegos."),
         ],
-        "tip": "Comprueba el nombre junto a «SAQUE» antes de sumar. El desempate usa siempre su propio tanteo, con cualquier regla de 40–40.",
+        "tip": "Antes de sumar, identifica la pareja junto a «SAQUE». La regla de 40–40 se aplica a los juegos regulares.",
     },
     {
         "title": "Cambiar la regla de 40–40 en pista",
@@ -132,7 +132,7 @@ pages = [
         "intro": "La ronda se cierra al sumar entre las dos parejas el número de juegos elegido.",
         "steps": [
             ("round_over", ('read', 129, 115), "Lee el cierre, también en empate",
-             "Esta ronda de seis se cierra 3–3. El empate es un resultado válido y podéis pasar a la siguiente ronda. El parcial se lee Nosotros–Rivales."),
+             "Esta ronda de seis se cierra 3–3. El empate es válido y podéis pasar a la ronda siguiente. El parcial se lee Nosotros–Rivales y arriba verás el tiempo total de la sesión."),
             ("round_over", "UP", "Revisa cómo quedó la ronda",
              "UP abre el historial. Pulsa BACK dentro del historial para volver al cierre. Si hay que corregir la última anotación, pulsa BACK en la pantalla de cierre."),
         ],
@@ -191,7 +191,7 @@ pages = [
         "intro": "Los resultados del resumen se leen Nosotros–Rivales, independientemente de quién sacaba.",
         "steps": [
             ("saved", "UP", "Abre el último set completado",
-             "El resumen del partido muestra cuántos sets ganó cada pareja. Pulsa UP para ver el último set completado si hay alguno."),
+             "El resumen muestra la duración de la grabación y los sets de cada pareja. Pulsa UP para ver el último set completado si hay alguno."),
             ("partial", "DOWN", "Recorre los resultados",
              "UP retrocede hacia los sets anteriores y DOWN avanza hasta volver al total. Con el táctil, toca «Parciales» para recorrerlos."),
         ],
@@ -209,3 +209,17 @@ pages = [
         "tip": "Puedes tocar «Parciales» para recorrer las rondas. El archivo FIT identifica los parciales incompletos con un asterisco.",
     },
 ]
+
+match_tiebreak = {
+    "title": "Decidir el partido con super tie-break",
+    "intro": "En un partido al mejor de tres, activa «Super tie-break» para decidir con un desempate el 1-1 en sets.",
+    "steps": [
+        ("match_tie_option", ("touch", 130, 153, (76, 17)), "Actívalo en Manual o en una plantilla",
+         "En el editor, elige Pádel por sets y Mejor de 3. Abre «Super tie-break» y elige «Sí». Puedes guardar esta opción en una plantilla."),
+        ("match_tie", ("read", 130, 130, (89, 9)), "Anota cada punto",
+         "Para ganar hacen falta al menos diez puntos y dos de margen. Saca primero la pareja a la que le tocaba tras el segundo set. Después del primer punto, el saque alterna cada dos puntos."),
+        ("match_tie_games", ("read", 130, 130, (112, 9)), "En Solo juegos, anota al ganador",
+         "«1.er saque» indica quién empieza. Jugad el desempate en pista y anota una vez quién ganó. El parcial muestra la pareja ganadora. En Cada punto, muestra el tanteo, como [10-8]."),
+    ],
+    "tip": "BACK deshace la última anotación y recupera el saque. Desde «Partido terminado», reabre el desempate para que puedas corregirlo.",
+}

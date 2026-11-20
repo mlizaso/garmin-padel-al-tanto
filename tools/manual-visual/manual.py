@@ -4,7 +4,7 @@ from propio import (
     activar, atajos, ayuda, bloquear, connect, evitar, gesto, idioma, inicio,
     instalar, mapa, pagina, sensores, vibracion,
 )
-from partido import pages as partido
+from partido import match_tiebreak, pages as partido
 from plantillas import pages as plantillas
 from layout import FONTS, build
 
@@ -24,7 +24,7 @@ americano = pagina("Juega un americano a seis juegos",
 sections = [
     ("Primeros pasos", [mapa, inicio, idioma, partido[0]]),
     ("Táctil y botones", [bloquear, activar, gesto, atajos, evitar]),
-    ("El marcador", [partido[i] for i in (1,2,3,4,5,7,8,9)]),
+    ("El marcador", [partido[i] for i in (1,2,3,4,5,7,8)] + [match_tiebreak, partido[9]]),
     ("Plantillas y reglas", plantillas),
     ("Americano", [americano, partido[10], partido[11]]),
     ("Guardar y consultar", [partido[i] for i in (12,13,15,16,6)]),

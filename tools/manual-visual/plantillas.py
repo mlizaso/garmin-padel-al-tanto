@@ -5,40 +5,40 @@ pages = [
         "steps": [
             (
                 "home",
-                (130, 122),
-                "Abre Plantillas",
-                "En el inicio de Padel al Tanto, elige Plantillas, justo debajo de Jugar.",
+                (130, 83),
+                "Abre Jugar",
+                "Toca Jugar en el inicio o selecciónalo con los botones y pulsa START.",
             ),
             (
-                "library",
-                (130, 84),
-                "Elige la fila del formato",
-                "La lista inicial empieza con Mejor de 3, Americano 7 y Americano 5, todos con Punto de oro. Baja para ver el otro Mejor de 3, que lleva Oro tras 1 ventaja.",
+                "play_menu",
+                (130, 130),
+                "Elige una plantilla",
+                "La lista incluye Mejor de 3, Americano 7 y Americano 5. Desplázate para ver las demás plantillas o vuelve a la primera fila para abrir Manual.",
             ),
             (
-                "template_actions",
-                (130, 84),
-                "Elige Usar plantilla",
-                "Se abre Primer saque con la configuración elegida. Desde ahí, BACK te devuelve al inicio.",
+                "serve",
+                "START",
+                "Confirma el primer saque",
+                "En Primer saque, elige qué pareja empieza y pulsa START para abrir el marcador y empezar a grabar.",
             ),
         ],
-        "tip": "Las cuatro plantillas iniciales vienen en Cada punto. La línea debajo del nombre indica la regla de iguales.",
+        "tip": "Las cuatro plantillas iniciales usan Cada punto. Desde Primer saque puedes pulsar BACK para volver a la lista de Jugar y elegir otra.",
     },
     {
         "title": "Configura tu partido",
-        "intro": "En Plantillas puedes ajustar el próximo partido o preparar una configuración para volver a usarla.",
+        "intro": "En Jugar, abre Manual para configurar el próximo partido. En Plantillas, elige Nueva plantilla para guardar una configuración que quieras reutilizar.",
         "steps": [
             (
-                "library_end",
-                (130, 176),
-                "Baja hasta Manual o Nueva plantilla",
-                "Elige Manual para preparar el partido que vas a jugar. Elige Nueva plantilla si quieres guardar los ajustes para futuras sesiones.",
+                "play_menu",
+                (130, 84),
+                "Elige Manual",
+                "La primera fila de Jugar abre el editor para el partido que vas a jugar. Sube con UP o toca la fila.",
             ),
             (
                 "editor",
                 (130, 84),
                 "Abre Formato",
-                "El editor de Nueva plantilla se llama Crear. En Crear y en Manual, Formato es la primera fila.",
+                "Formato es la primera fila de Manual. Aquí se ve la misma fila en Crear, el editor que se abre al elegir Nueva plantilla.",
             ),
             (
                 "formats",
@@ -57,7 +57,7 @@ pages = [
                 "sets",
                 (130, 130),
                 'Pádel · Elige los sets',
-                "En Mejor de 1, 3 o 5 gana la primera pareja que consigue 1, 2 o 3 sets, respectivamente. Baja hasta Sets sin límite para jugar hasta que decidas terminar.",
+                "En Mejor de 1, 3 o 5 gana la primera pareja que consigue 1, 2 o 3 sets, respectivamente. En Mejor de 3 puedes activar Super tie-break. Con Sets sin límite, tú decides cuándo terminar.",
             ),
             (
                 "americano_editor",
@@ -104,7 +104,7 @@ pages = [
         "intro": "Con Cada punto, la regla de Iguales determina qué pasa cuando las dos parejas llegan a 40.",
         "steps": [
             (
-                "editor_bottom",
+                "manual",
                 (130, 84),
                 "Busca Iguales debajo de Anotar",
                 "Abre Iguales y recorre las cuatro reglas con UP y DOWN. Pulsa START sobre la que quieras usar o tócala.",
@@ -132,7 +132,7 @@ pages = [
                 "editor_bottom",
                 (130, 130),
                 "Entra en Nombre",
-                "En Crear o Editar, baja hasta Nombre. Déjalo vacío si prefieres el nombre automático, como Mejor de 3 o Americano 7.",
+                "En Plantillas, elige Nueva plantilla para abrir Crear, o selecciona una que ya tengas y elige Editar. Baja hasta Nombre y déjalo vacío si prefieres el automático.",
             ),
             (
                 "name",
@@ -156,20 +156,20 @@ pages = [
             (
                 "manual",
                 (130, 176),
-                "En Manual, elige Aplicar",
-                "Aplicar abre Primer saque con los ajustes para este partido.",
+                "En Manual, elige Continuar",
+                "Continuar abre Primer saque con los ajustes para este partido.",
             ),
             (
                 "editor_bottom",
                 (130, 176),
                 "En Crear o Editar, elige Guardar",
-                "El reloj vuelve al menú de acciones de la plantilla guardada. Elige Usar plantilla para preparar el partido con esos ajustes.",
+                "La configuración queda en la lista de Plantillas. Vuelve al inicio, elige Jugar y selecciona la plantilla que acabas de guardar.",
             ),
             (
-                "serve",
-                ('read', 130, 150),
+                "serve_super",
+                ('read', 130, 149, (112, 9)),
                 "Comprueba la configuración",
-                "En Primer saque verás el formato y, debajo, la regla de iguales o Anotar · Solo juegos. Elige la pareja que saca y pulsa START cuando quieras empezar.",
+                "En Primer saque puedes comprobar el formato, el modo de anotación y si activaste Super tie-break. Elige la pareja que saca y pulsa START para empezar.",
             ),
         ],
         "tip": "Al poner un nombre, usa también Guardar en la última fila de Crear o Editar para registrar la plantilla completa.",
@@ -180,13 +180,13 @@ pages = [
         "steps": [
             (
                 "template_actions",
-                (130, 130),
+                (130, 107),
                 "Elige Editar para cambiarla",
                 "Se abre el editor con los ajustes que ya tiene la plantilla. Haz los cambios y baja hasta Guardar para actualizarla.",
             ),
             (
                 "template_actions",
-                (130, 176),
+                (130, 153),
                 "Elige Eliminar para quitarla",
                 "El reloj muestra ¿Eliminar? y vuelve a mostrar el nombre de la plantilla debajo de la opción Eliminar.",
             ),
@@ -197,6 +197,6 @@ pages = [
                 "Selecciona Eliminar para quitar la plantilla de la lista. Elige Cancelar o pulsa BACK para volver al menú de acciones.",
             ),
         ],
-        "tip": "Si borras todas las de la lista, al volver verás Sin plantillas con Manual y Nueva plantilla.",
+        "tip": "Si borras todas, puedes crear otra en Plantillas con Nueva plantilla o empezar un partido con Jugar y Manual.",
     },
 ]

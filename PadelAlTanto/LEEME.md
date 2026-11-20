@@ -1,4 +1,4 @@
-# Padel al Tanto · Versión 0.8.0
+# Padel al Tanto · Versión 0.9.0
 
 [Abrir el manual visual en PDF](../Manual-visual-Padel-al-Tanto.pdf)
 
@@ -23,8 +23,8 @@ Si actualizas una copia instalada manualmente, conserva una copia del PRG anteri
 
 En el inicio de Padel al Tanto verás **Jugar**, **Plantillas** y **Ajustes** (**Play**, **Templates** y **Settings** en inglés). Toca una fila o muévete con UP/DOWN y pulsa START para elegirla.
 
-* **Jugar** te lleva a **Primer saque**. Elige la pareja y pulsa START para empezar la grabación.
-* **Plantillas** reúne el formato de partido, el americano, las reglas y la configuración manual.
+* **Jugar** abre tus plantillas y la opción **Manual**. Elige una plantilla o configura el partido y pulsa **Continuar**. En **Primer saque**, UP selecciona **Nosotros** y DOWN selecciona **Rivales**. Pulsa START en **Iniciar** para empezar el partido y la grabación.
+* **Plantillas** permite crear, editar y eliminar formatos guardados. Vuelve a **Jugar** para disputar un partido con ellos.
 * **Ajustes → Pantalla táctil** guarda tu preferencia para toda la aplicación. Toca la fila **Pantalla táctil** o selecciónala con UP/DOWN y pulsa START para alternar entre **Sí** y **No**. Con el táctil desactivado, usa los botones físicos. Las plantillas conservan esta preferencia al cambiar de formato.
 * **Ajustes → Detección de golpes** activa o desactiva la estimación de golpes. La opción empieza desactivada y el reloj recuerda el estado que elijas.
 
@@ -49,10 +49,10 @@ La primera vez encontrarás cuatro plantillas. Puedes usar cualquiera directamen
 | Americano a cinco | Suman cinco juegos | Punto de oro inmediato |
 | Partido al mejor de tres con una ventaja | Una pareja gana dos sets | Tras perder la primera ventaja, el siguiente punto decide |
 
-En el inicio, abre **Plantillas**. Elige una y pulsa **Usar plantilla**. En **Primer saque** verás el formato y la regla antes de empezar. BACK te devuelve al inicio.
+En **Jugar**, selecciona directamente la plantilla que quieras usar. En **Primer saque** verás el formato y podrás revisar tu elección con BACK.
 
 * **Manual** aplica el formato, el modo de anotación, el número de juegos o sets y, cuando corresponda, la regla de iguales solo al partido que vas a jugar.
-* **Nueva plantilla** guarda esa combinación para otra sesión. Puedes ponerle un nombre propio, como «Club», o conservar el nombre automático. Tras pulsar **Guardar**, elige **Usar plantilla** para jugar con ella.
+* **Plantillas → Nueva plantilla** guarda esa combinación para otra sesión. Puedes ponerle un nombre propio, como «Club», o conservar el nombre automático. Tras pulsar **Guardar**, la encontrarás en **Jugar**.
 * Para modificar o eliminar una plantilla, elígela en la lista y pulsa **Editar** o **Eliminar**. También puedes eliminar las cuatro iniciales. La próxima vez se conservará tu lista, incluso vacía.
 
 ### Anotar cada punto o solo los juegos
@@ -95,7 +95,7 @@ El reloj emite una vibración breve al sumar un punto y otra más larga al cerra
 
 ### Elegir la regla de 40–40
 
-Antes de jugar, elige la regla en **Plantillas → Manual → Iguales** o en el editor de una plantilla. Durante un partido anotado punto a punto, pulsa START y elige **Regla en iguales**. Selecciona con UP/DOWN y confirma con START.
+Antes de jugar, elige la regla en **Jugar → Manual → Iguales** o en el editor de una plantilla. Durante un partido anotado punto a punto, pulsa START y elige **Regla en iguales**. Selecciona con UP/DOWN y confirma con START.
 
 | Regla | ¿Cuándo decide el siguiente punto? |
 |---|---|
@@ -107,6 +107,16 @@ Antes de jugar, elige la regla en **Plantillas → Manual → Iguales** o en el 
 La pareja que gana dos puntos seguidos desde iguales cierra el juego en cualquiera de los modos con ventaja. Puedes cambiar de regla en la aplicación. Si ya has anotado algún punto, el juego en curso conserva la regla con la que empezó. En 0–0 la regla elegida se aplica al juego que va a empezar.
 
 Un set se gana al llegar al menos a seis juegos con dos de diferencia. En 6–6 comienza el tie-break a siete puntos con dos de diferencia, con independencia de la regla que elijas para 40–40. Puedes guardar la actividad antes de terminar un set. Si el ajuste táctil de la app está activo y el reloj ignora los toques, revisa que el sistema permita el táctil durante la actividad.
+
+### Súper tie-break en lugar del tercer set
+
+En un partido **Mejor de 3**, activa **Súper tie-break** en el editor manual o en una plantilla. Si cada pareja gana un set, el reloj pasa a contar 0, 1, 2… Gana el partido la primera pareja que consigue al menos diez puntos con dos de ventaja. A 9–9 o 10–9 se sigue jugando. La pareja a la que toca sacar juega el primer punto y después el saque cambia cada dos puntos. Las parejas cambian de lado cada seis puntos. [Reglamento de la FIP, reglas 1 y 5](https://www.padelfip.com/wp-content/uploads/2025/12/FIP_Reglas-del-Padel-1.pdf#page=12)
+
+En **Solo juegos**, disputad el súper tie-break en pista y marca una vez la pareja ganadora. En **Cada punto**, el parcial exacto aparece entre corchetes, por ejemplo `[11-9]`. BACK permite corregir el resultado antes de guardar.
+
+### Hora y tiempo de juego
+
+En el marcador, el reloj blanco indica la hora local con el formato de 12 o 24 horas de tu Garmin. El cronómetro amarillo muestra cuánto tiempo ha pasado desde **Iniciar**, incluidos los descansos, los menús y los cambios de ronda del americano. Al cumplir una hora pasa de minutos y segundos a horas, minutos y segundos. Al guardar la actividad puedes consultar el total en el resumen.
 
 ## Pulsaciones, resultado y estimación de golpes
 
