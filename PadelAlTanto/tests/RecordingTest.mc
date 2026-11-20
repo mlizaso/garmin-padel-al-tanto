@@ -1,5 +1,6 @@
 import Toybox.Lang;
 import Toybox.Test;
+import Toybox.WatchUi;
 import Toybox.Application.Storage;
 
 (:test)
@@ -96,6 +97,104 @@ function savedHistoryDistinguishesGamesFromLegacyPoints(logger as Test.Logger) a
         restoreTestHistory(original);
     }
     return true;
+}
+
+(:test)
+function toggleStrokeDetectionDuringRecording(logger as Test.Logger) as Boolean {
+    var originalStrokes = Storage.getValue("strokeDetection");
+    var previousHistory = Storage.getValue("lastScoredPoints");
+    var view = new MatchVibrationTestView();
+    var input = new MatchInput(view);
+    var counter = new RecordingStrokeTestCounter();
+    view.recording.strokes = counter;
+    view.page = READY;
+    view.touchOn = true;
+    try {
+        view.recording.setStrokeDetection(false);
+        input.handleKey(WatchUi.KEY_ENTER);
+        Test.assertEqual(PLAYING, view.page);
+        var session = view.recording.session;
+        Test.assert(session.isRecording());
+        Test.assertEqual(0, counter.starts);
+        Test.assert(view.recording.hits == null);
+        input.handleKey(WatchUi.KEY_UP);
+
+        input.handleKey(WatchUi.KEY_MENU);
+        Test.assertEqual(SETTINGS, view.page);
+        input.tapAt(130, view.settingY(STROKE_SETTING));
+        Test.assert(counter.sampling);
+        Test.assertEqual(1, counter.starts);
+        counter.available = true;
+        counter.count = 3;
+
+        input.tapAt(130, view.settingY(STROKE_SETTING));
+        Test.assert(!counter.sampling);
+        input.tapAt(130, view.settingY(STROKE_SETTING));
+        Test.assert(counter.sampling);
+        Test.assertEqual(2, counter.starts);
+        Test.assert(counter.available);
+        Test.assertEqual(3, counter.count);
+        input.tapAt(130, view.settingY(STROKE_SETTING));
+        Test.assert(!counter.sampling);
+
+        input.handleKey(WatchUi.KEY_ESC);
+        Test.assertEqual(PLAYING, view.page);
+        Test.assert(view.recording.session == session);
+        Test.assert(session.isRecording());
+        Test.assert(view.touchOn);
+        input.tapAt(130, view.pointY(true));
+        Test.assertEqual("30", view.score.pointsText(0));
+
+        view.finish();
+        Test.assertEqual(FINISHED, view.page);
+        Test.assert(view.recording.session == null);
+        Test.assert(view.recording.hits != null);
+    } finally {
+        view.shutdown();
+        restoreTestHistory(previousHistory);
+        if (originalStrokes == null) { Storage.deleteValue("strokeDetection"); }
+        else { Storage.setValue("strokeDetection", originalStrokes); }
+    }
+    return true;
+}
+
+(:test)
+function saveWithoutStrokeSamplesOmitsStrokeField(logger as Test.Logger) as Boolean {
+    var previousHistory = Storage.getValue("lastScoredPoints");
+    var score = new PadelScore();
+    var recording = new MatchRecording();
+    var counter = new RecordingStrokeTestCounter();
+    recording.strokes = counter;
+    try {
+        recording.setStrokeDetection(true);
+        Test.assertEqual(0, counter.starts);
+        Test.assert(recording.begin(score.gameLimit));
+        Test.assert(counter.sampling);
+        Test.assert(recording.hits == null);
+        score.point(0);
+        Test.assert(recording.save(score));
+        Test.assert(!counter.sampling);
+        Test.assert(recording.hits == null);
+    } finally {
+        if (recording.session != null) { recording.save(score); }
+        restoreTestHistory(previousHistory);
+    }
+    return true;
+}
+
+(:test)
+class RecordingStrokeTestCounter extends StrokeCounter {
+    var starts as Number = 0;
+    var sampling as Boolean = false;
+
+    function start() as Void {
+        starts++;
+        sampling = true;
+    }
+
+    function stop() as Void {
+        sampling = false;
+    }
 }
 
 function restoreTestHistory(original as Storage.ValueType) as Void {

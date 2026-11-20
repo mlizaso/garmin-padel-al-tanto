@@ -34,7 +34,7 @@ REGULAR = "Manual-Regular"
 BOLD = "Manual-Bold"
 DISPLAY = "Manual-Display"
 APP_NAME = "Padel al Tanto"
-DEFAULT_VERSION = "0.7.0"
+DEFAULT_VERSION = "0.8.0"
 FONTS = Path("/System/Library/Fonts/Supplemental")
 TOC_TOP = 123
 TOC_BOTTOM = FOOTER_TOP - 14
@@ -413,7 +413,7 @@ def draw_cover(sheet, watch, cover, total, version):
     sheet.link("indice", M + 15, 455, 108, 33)
     watch.draw(sheet, cover, None, W - M - 176, 74, 445)
     sheet.label(
-        "Capturas del simulador Connect IQ · fēnix 7 Pro",
+        "Capturas del simulador Connect IQ · fēnix 7 y fēnix 7 Pro",
         W - M - 176, 531, 9, REGULAR, MUTED, "center",
     )
     page_footer(sheet, 1, total, version)

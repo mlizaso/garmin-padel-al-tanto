@@ -2,13 +2,13 @@
 
 [![Connect IQ](https://github.com/mlizaso/garmin-padel-al-tanto/actions/workflows/connect-iq.yml/badge.svg)](https://github.com/mlizaso/garmin-padel-al-tanto/actions/workflows/connect-iq.yml)
 
-Marcador de pádel para el **Garmin fēnix 7 y fēnix 7 Pro de 47 mm**. La pareja que saca aparece arriba. Puedes anotar con botones o toques, deshacer, llevar solo los juegos y grabar la actividad con el pulso. Admite partidos por sets y rondas de americano de duración configurable. La interfaz está en español e inglés.
+Marcador de pádel para el **Garmin fēnix 7 y fēnix 7 Pro de 47 mm**. La pareja que saca aparece arriba. Puedes anotar con botones o toques, deshacer, llevar solo los juegos y grabar la actividad con el pulso. Admite partidos por sets y rondas de americano de duración configurable. La interfaz está en español e inglés. La estimación de golpes con el movimiento de la muñeca está desactivada por defecto. Puedes activarla en **Ajustes → Detección de golpes**.
 
 ![Marcador a 30–30 en el simulador](Tienda/capturas/01-marcador.png)
 
 Para jugar, descarga el paquete USB de la [última versión](https://github.com/mlizaso/garmin-padel-al-tanto/releases/latest), elige el PRG de tu modelo y sigue la [guía de instalación y controles](PadelAlTanto/LEEME.md) o el [manual visual](Manual-visual-Padel-al-Tanto.pdf). La [galería](Vista-previa/Galeria.html) se puede abrir en un navegador desde una copia local del proyecto.
 
-**For players:** download the USB package from the [latest release](https://github.com/mlizaso/garmin-padel-al-tanto/releases/latest). Copy your model’s `PADELAT.PRG` to `GARMIN/APPS` on your watch and disconnect it. The app follows the watch language, using English for languages other than Spanish. You can choose either language under **Settings → Language**.
+**For players:** download the USB package from the [latest release](https://github.com/mlizaso/garmin-padel-al-tanto/releases/latest). Copy your model’s `PADELAT.PRG` to `GARMIN/APPS` on your watch and disconnect it. The app follows the watch language, using English for languages other than Spanish. You can choose either language under **Settings → Language**. Wrist-based stroke detection is off by default. Turn it on under **Settings → Stroke detection**.
 
 ## Desarrollo y pruebas
 
@@ -25,7 +25,11 @@ python3 scripts/run_tests.py fenix7 bin/tests.prg
 
 Para el modelo Pro, sustituye `fenix7` por `fenix7pro` en los tres comandos. Las pruebas cubren el tanteo, los sets y desempates, el americano, las plantillas, los gestos, el idioma y la lógica de grabación y detección de golpes. La precisión del sensor y la sensación de la vibración se comprueban en pista.
 
-En cada pull request y cada cambio en `main`, [GitHub Actions](.github/workflows/connect-iq.yml) lee los modelos del manifiesto y compila la versión de distribución y la de pruebas para cada reloj. Arranca el simulador de Garmin y verifica que haya pruebas ejecutadas, que todas pasen y que el total coincida. Cada ejecución genera su propia clave temporal. El flujo fija la huella del SDK oficial y de la [imagen de Linux con los perfiles y fuentes](https://github.com/matco/connectiq-tester). Al actualizar el SDK o los perfiles, actualiza la huella correspondiente y comprueba los resultados de los simuladores.
+En cada pull request y cada cambio en `main`, [GitHub Actions](.github/workflows/connect-iq.yml) lee los modelos del manifiesto y compila la versión de distribución y la de pruebas para cada reloj. Lee la lista de pruebas generada por el compilador y abre un simulador nuevo para cada caso. Así, las grabaciones de una prueba no interfieren con la siguiente. La CI comprueba el nombre y resultado de cada caso y falla si falta alguno. Cada ejecución genera su propia clave temporal. El flujo fija la huella del SDK oficial y de la [imagen de Linux con los perfiles y fuentes](https://github.com/matco/connectiq-tester). Al actualizar el SDK o los perfiles, actualiza la huella correspondiente y comprueba los resultados de los simuladores.
+
+## Preparar el paquete USB
+
+Crea el ZIP público con el PRG de distribución de cada modelo, el manual PDF y los archivos versionados de `PadelAlTanto/`. En la raíz del ZIP van `PADELAT.PRG` para el fēnix 7 y `Manual-visual-Padel-al-Tanto.pdf`. Coloca el PRG del modelo Pro en `fenix7pro/PADELAT.PRG`. Usa el archivo `.iq` para el envío a la tienda Connect IQ.
 
 ## Actualizar el manual y la galería
 

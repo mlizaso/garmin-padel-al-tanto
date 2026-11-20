@@ -23,7 +23,6 @@ class StrokeCounter {
         _burst = 0;
         _peak = false;
         _cooldown = 0;
-        available = false;
         try {
             if (Sensor.getMaxSampleRate() < RATE) {
                 return;
@@ -50,8 +49,11 @@ class StrokeCounter {
     }
 
     function onMotion(data as Sensor.SensorData) as Void {
+        if (!_listening) {
+            return;
+        }
         var accel = data.accelerometerData;
-        if (!_listening || accel == null) {
+        if (accel == null) {
             return;
         }
         var x = accel.x;

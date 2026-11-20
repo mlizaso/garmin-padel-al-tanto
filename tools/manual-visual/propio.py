@@ -16,14 +16,14 @@ inicio = pagina("Qué elegir al abrir Padel al Tanto",
          "Elige Jugar para preparar el primer saque. El reloj empieza a grabar cuando confirmes el inicio en la pantalla siguiente."),
         ("home", ("touch",130,122,(56,13)), "Plantillas · Elige cómo puntuar",
          "Entra aquí para elegir sets o americano, punto de oro, ventajas o Solo juegos. Puedes guardar tus combinaciones con un nombre."),
-        ("home", ("touch",130,161,(47,13)), "Ajustes · Cambia el táctil o el idioma",
-         "En Ajustes, selecciona Pantalla táctil para permitir toques o Idioma para cambiar el texto de la app. BACK regresa al inicio."),
+        ("home", ("touch",130,161,(47,13)), "Ajustes · Preferencias de la app",
+         "Desde esta opción puedes cambiar el táctil o el idioma y activar la detección de golpes. BACK regresa al inicio."),
     ], "Si ya guardaste una actividad con anotaciones, verás también «Última sesión». Con los toques activos puedes abrir cualquier opción tocando su fila.")
 
 idioma = pagina("Cambia el idioma de la aplicación",
     "En el inicio, abre Ajustes (Settings en inglés). En pleno partido, pulsa START y elige Ajustes.",
     [
-        ("settings_language", ("touch",130,169,(91,14)), "Abre Idioma",
+        ("settings_language", ("touch",130,122,(91,14)), "Abre Idioma",
          "Toca Idioma (Language en inglés). Con botones, usa UP o DOWN para seleccionarla y pulsa START."),
         ("language_es", ("touch",130,148,(45,14)), "Elige Español o English",
          "Toca el idioma para aplicarlo. Con botones, selecciona con UP o DOWN y confirma con START."),
@@ -34,11 +34,11 @@ idioma = pagina("Cambia el idioma de la aplicación",
 bloquear = pagina("Desactiva el táctil en pleno partido",
     "Prueba con un 30–30. El marcador y la grabación siguen en marcha mientras abres Ajustes.",
     [
-        ("play30", "START", "Abre el menú con START",
+        ("play30_strokes_off", "START", "Abre el menú con START",
          "Desde el marcador, pulsa una vez el botón superior derecho. También puedes tocar «Menú» al pie de la esfera."),
         ("match_menu", "START", "Entra en Ajustes con START",
          "Ajustes es la primera opción y al entrar ya está resaltada. Pulsa otra vez el botón superior derecho."),
-        ("enabled", ("touch",130,117,(95,14)), "Toca la fila Pantalla táctil",
+        ("enabled", ("touch",130,83,(95,14)), "Toca la fila Pantalla táctil",
          "El estado pasa de «Sí» a «No». También puedes cambiarlo con START sobre esa fila. A partir de aquí usa los botones físicos."),
     ], "Pulsa BACK dos veces, una para salir de Ajustes y otra para cerrar el menú. Verás «Táctil no». Los toques y los deslizamientos quedan bloqueados.")
 
@@ -86,16 +86,16 @@ evitar = pagina("Tres pulsaciones que conviene evitar",
          "En «¿Terminar?», START inicia el guardado. Para seguir jugando, pulsa BACK o toca «Seguir jugando»."),
     ], "Cuando el táctil está bloqueado, los botones siguen activos. Mira «SAQUE» antes de usar UP, porque las parejas cambian de fila al cambiar el servicio.")
 
-sensores = pagina("Lee el pulso y los golpes estimados",
-    "Los dos datos de actividad aparecen en la cabecera del marcador. La grabación empieza al confirmar el primer saque.",
+sensores = pagina("Activa la detección de golpes",
+    "La detección de golpes está desactivada por defecto. El reloj muestra el pulso durante la actividad cuando hay datos.",
     [
-        ("play30", ("read",85,26), "lpm · Pulsaciones por minuto",
-         "Lleva el reloj ajustado con el sensor de muñeca en Auto o usa tu banda habitual. Dos guiones indican que aún faltan datos."),
-        ("play30", ("read",167,26), "Golpes · Movimientos del brazo",
-         "Lleva el reloj en la muñeca de la pala. El acelerómetro estima tus golpes. Puede contar un gesto sin pelota o pasar por alto una volea corta."),
-        ("saved", ("read",130,164), "Consulta la estimación guardada",
-         "El resumen muestra la estimación si hubo datos del sensor. En esta captura del simulador aparece «Golpes sin datos»."),
-    ], "Para probarlo, mira el contador, da 20 golpes y compara el incremento. Los movimientos del brazo nunca suman puntos al marcador.")
+        ("strokes_off", ("touch",130,161,(123,14)), "Selecciona Detección de golpes",
+         "Desde el inicio, abre Ajustes. Durante el partido, pulsa START y elige Ajustes. Baja con DOWN hasta la tercera fila."),
+        ("strokes_on", ("read",130,161,(123,14)), "Cambia el ajuste a «Sí»",
+         "Pulsa START sobre esa fila o tócala con la pantalla táctil activa. El reloj recuerda tu elección para las próximas sesiones."),
+        ("play30", ("read",161,26,(41,10)), "Consulta los golpes en el marcador",
+         "Lleva el reloj en la muñeca de la pala. «~-- golpes» aparece mientras faltan muestras. El recuento puede incluir gestos sin pelota u omitir algún golpe."),
+    ], "Si desactivas la detección durante el partido, se conserva el recuento acumulado hasta ese momento y el pulso sigue disponible.")
 
 vibracion = pagina("Reconoce la vibración sin mirar",
     "La app elige la vibración según lo que acaba de cerrarse. Puedes reconocerla en la muñeca mientras juegas.",
@@ -111,7 +111,7 @@ vibracion = pagina("Reconoce la vibración sin mirar",
 ayuda = pagina("Si el reloj no responde como esperabas",
     "Identifica primero qué pantalla ves. El aviso «Sin espacio» se ha reproducido en el simulador para esta guía.",
     [
-        ("enabled", ("read",130,117,(95,14)), "La fila dice «Sí» y faltan los toques",
+        ("enabled", ("read",130,83,(95,14)), "La fila dice «Sí» y faltan los toques",
          "Desde la esfera de Garmin, mantén MENU y abre Sistema > Táctil. Comprueba que esté permitido durante la actividad. En Padel al Tanto puedes usar los botones en todo momento."),
         ("serve", "START", "Si aparece «Error al iniciar»",
          "Comprueba que puedes iniciar una actividad y que hay espacio en el reloj. Vuelve a Primer saque y pulsa START. Espera a ver el marcador antes de anotar."),
@@ -131,7 +131,7 @@ instalar = pagina("Abrir el simulador o instalar por USB",
     ], "Si actualizas una instalación manual, guarda una copia del PRG anterior y usa su nombre de archivo al reemplazarlo para conservar tus ajustes. En Windows abre el reloj en el Explorador. En Mac, cierra Garmin Express antes de abrir el cliente MTP.")
 
 connect = pagina("Consulta la actividad en Garmin Connect",
-    "Al guardar, el reloj crea un archivo FIT de pádel con el tiempo de actividad y las muestras recogidas.",
+    "El archivo FIT contiene el tiempo, el resultado y el pulso disponible. Si activaste la detección y hubo muestras válidas, incluye el recuento estimado de golpes.",
     [
         ("confirm", "START", "Guarda y espera el resumen",
          "En «¿Terminar?», pulsa START. Espera hasta que veas «Partido guardado» o «Sesión guardada»."),

@@ -2,11 +2,11 @@ Padel al Tanto · Privacidad / Privacy
 
 ESPAÑOL
 
-Al iniciar un partido, Padel al Tanto usa las anotaciones del marcador, el tiempo transcurrido y, cuando están disponibles, la frecuencia cardíaca y el movimiento de la muñeca para mostrar y registrar la sesión de pádel. Las muestras del acelerómetro se usan en el reloj para estimar golpes. En la actividad se guarda la estimación, sin las muestras originales.
+Al iniciar un partido, Padel al Tanto usa las anotaciones del marcador, el tiempo transcurrido y la frecuencia cardíaca, si está disponible, para mostrar y registrar la sesión de pádel. A partir de la versión 0.8.0, la detección de golpes está desactivada por defecto. Puedes activarla en Ajustes → Detección de golpes para que el reloj procese muestras del acelerómetro durante la sesión y estime los golpes. Si la desactivas, el reloj deja de leer el movimiento y conserva la estimación obtenida hasta entonces. En la versión 0.7.0, la app solicita muestras del acelerómetro automáticamente al iniciar la grabación del partido.
 
 Padel al Tanto guarda en el reloj tus ajustes, plantillas y las últimas cinco anotaciones de la última sesión guardada. Las anotaciones se sustituyen al guardar otra sesión y puedes borrar las plantillas desde el reloj.
 
-Al guardar, el reloj crea una actividad FIT con la duración, el resultado, la frecuencia cardíaca y la estimación de golpes cuando están disponibles. Si sincronizas el reloj, la actividad puede aparecer en tu cuenta de Garmin Connect. Puedes eliminar esa copia desde Garmin Connect.
+Al guardar, el reloj crea una actividad FIT con la duración, el resultado y la frecuencia cardíaca si está disponible. Si el reloj recogió muestras válidas con la detección activa, el FIT incluye solo el recuento estimado de golpes como dato de movimiento. Si sincronizas el reloj, la actividad puede aparecer en tu cuenta de Garmin Connect. Puedes eliminar esa copia desde Garmin Connect.
 
 El desarrollador no recibe datos del reloj. Los datos que introduces en Padel al Tanto se procesan en la aplicación bajo la responsabilidad de su desarrollador. Garmin gestiona por separado los datos sincronizados con Garmin Connect, conforme a su política de privacidad.
 
@@ -14,11 +14,11 @@ Si tienes una consulta o quieres ejercer tus derechos sobre tus datos, usa la op
 
 ENGLISH
 
-When you start a match, Padel al Tanto uses score entries, elapsed time and, when available, heart rate and wrist motion to display and record your padel session. The watch uses accelerometer samples to estimate strokes. The activity stores the estimate without storing the original samples.
+When you start a match, Padel al Tanto uses score entries, elapsed time and heart rate when available to display and record your padel session. From version 0.8.0, stroke detection is off by default. Turn it on in Settings → Stroke detection to use accelerometer samples on the watch during the session to estimate strokes. Turning it off stops collection and keeps the estimated count from earlier in the session. Version 0.7.0 automatically requests accelerometer samples when match recording starts.
 
 Padel al Tanto stores your preferences, presets, and the last five scoring entries from your most recently saved session on the watch. Saving another session replaces the entries, and you can delete presets on the watch.
 
-When you save, the watch creates a FIT activity with the duration, score, heart rate and estimated stroke count when available. If you sync your watch, the activity may appear in your Garmin Connect account. You can delete that copy in Garmin Connect.
+When you save, the watch creates a FIT activity with the duration, score and heart rate when available. If the watch collected valid samples while stroke detection was on, it includes only the estimated stroke count as motion data in the FIT activity. If you sync your watch, the activity may appear in your Garmin Connect account. You can delete that copy in Garmin Connect.
 
 The developer does not receive data from the watch. Data you enter in Padel al Tanto is processed in the app under the developer's responsibility. Garmin separately handles data synced to Garmin Connect under its privacy policy.
 

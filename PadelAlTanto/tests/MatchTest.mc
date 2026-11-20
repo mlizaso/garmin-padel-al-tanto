@@ -20,7 +20,7 @@ function openTouchSettingsFromHomeAndReady(logger as Test.Logger) as Boolean {
         Test.assert(!view.touchOn);
         var reopened = new MatchView();
         Test.assert(!reopened.touchOn);
-        input.tapAt(130, view.yAt(49));
+        input.tapAt(130, view.settingY(TOUCH_SETTING));
         Test.assert(!view.touchOn);
         input.handleKey(WatchUi.KEY_ESC);
         Test.assertEqual(HOME, view.page);
@@ -51,6 +51,57 @@ function openTouchSettingsFromHomeAndReady(logger as Test.Logger) as Boolean {
     } finally {
         if (originalSetting == null) { Application.Storage.deleteValue("pointTouch"); }
         else { Application.Storage.setValue("pointTouch", originalSetting); }
+    }
+    return true;
+}
+
+(:test)
+function strokeDetectionRequiresOptInAndRemembersSettings(logger as Test.Logger) as Boolean {
+    var originalStrokes = Application.Storage.getValue("strokeDetection");
+    var originalTouch = Application.Storage.getValue("pointTouch");
+    try {
+        Application.Storage.deleteValue("strokeDetection");
+        Application.Storage.setValue("pointTouch", false);
+        var view = new MatchView();
+        var input = new MatchInput(view);
+
+        Test.assert(!view.recording.strokeDetectionOn);
+        Test.assert(Application.Storage.getValue("strokeDetection") == null);
+        input.handleKey(WatchUi.KEY_MENU);
+        Test.assertEqual(SETTINGS, view.page);
+        input.handleKey(WatchUi.KEY_DOWN);
+        input.handleKey(WatchUi.KEY_DOWN);
+        input.handleKey(WatchUi.KEY_ENTER);
+        Test.assert(view.recording.strokeDetectionOn);
+        Test.assertEqual(true, Application.Storage.getValue("strokeDetection"));
+        Test.assert(!view.touchOn);
+        Test.assertEqual(false, Application.Storage.getValue("pointTouch"));
+        var optedIn = new MatchView();
+        Test.assert(optedIn.recording.strokeDetectionOn);
+
+        input.tapAt(130, view.settingY(STROKE_SETTING));
+        Test.assert(view.recording.strokeDetectionOn);
+        input.handleKey(WatchUi.KEY_UP);
+        input.handleKey(WatchUi.KEY_UP);
+        input.handleKey(WatchUi.KEY_ENTER);
+        Test.assert(view.touchOn);
+        Test.assert(view.recording.strokeDetectionOn);
+
+        input.tapAt(130, view.settingY(STROKE_SETTING));
+        Test.assert(!view.recording.strokeDetectionOn);
+        Test.assert(view.touchOn);
+        Test.assertEqual(true, Application.Storage.getValue("pointTouch"));
+        var optedOut = new MatchView();
+        Test.assert(!optedOut.recording.strokeDetectionOn);
+
+        Application.Storage.setValue("strokeDetection", "true");
+        var invalid = new MatchView();
+        Test.assert(!invalid.recording.strokeDetectionOn);
+    } finally {
+        if (originalStrokes == null) { Application.Storage.deleteValue("strokeDetection"); }
+        else { Application.Storage.setValue("strokeDetection", originalStrokes); }
+        if (originalTouch == null) { Application.Storage.deleteValue("pointTouch"); }
+        else { Application.Storage.setValue("pointTouch", originalTouch); }
     }
     return true;
 }
@@ -105,7 +156,7 @@ function changeLanguageFromHomeAndDuringRecording(logger as Test.Logger) as Bool
 
         input.tapAt(164, view.yAt(91));
         input.tapAt(130, view.menuY(0));
-        input.tapAt(130, view.settingY(true));
+        input.tapAt(130, view.settingY(LANGUAGE_SETTING));
         Test.assertEqual(LANGUAGE, view.page);
         Test.assert(view.languageChoiceEnglish);
         input.tapAt(130, view.languageY(false));
@@ -209,7 +260,7 @@ function recordMatchWithKeysAndTouch(logger as Test.Logger) as Boolean {
         Test.assertEqual(OPTIONS, view.page);
         input.tapAt(130, view.menuY(0));
         Test.assertEqual(SETTINGS, view.page);
-        input.tapAt(130, view.yAt(49));
+        input.tapAt(130, view.settingY(TOUCH_SETTING));
         Test.assert(!view.touchOn);
         Test.assertEqual(SETTINGS, view.page);
         input.handleKey(WatchUi.KEY_ESC);

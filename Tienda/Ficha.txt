@@ -1,5 +1,5 @@
 Padel al Tanto
-Connect IQ · Device App · Gratis · 0.7.0
+Connect IQ · Device App · Gratis · 0.8.0
 Contacto: opción de contacto con el desarrollador en Connect IQ
 Política de privacidad: Privacidad.html
 
@@ -10,12 +10,12 @@ Lleva el marcador de pádel en tu reloj. Anota cada punto o solo los juegos con 
 • Juega partidos al mejor de tres o cinco sets y rondas de americano con un número de juegos configurable.
 • Elige ventaja, punto de oro, una ventaja y oro o dos ventajas y oro (Star Point). Guarda tus ajustes como plantillas.
 • Revisa las cinco últimas anotaciones. Guarda el partido completo o un parcial como actividad de pádel y sincronízalo con Garmin Connect.
-• Consulta tus pulsaciones cuando el sensor esté disponible. Lleva el reloj en el brazo de la pala para ver una estimación de golpes a partir del movimiento de la muñeca.
+• Consulta tus pulsaciones cuando el sensor esté disponible. Si quieres estimar tus golpes, activa Ajustes → Detección de golpes y lleva el reloj en el brazo de la pala.
 
 Compatible con Garmin fēnix 7 y fēnix 7 Pro de 47 mm, incluida la edición Pro Sapphire Solar. El marcador funciona en el reloj durante el partido. Si tu reloj está en español, la app se abre en español. Para los demás idiomas se abre en inglés. Puedes cambiarlo en Ajustes → Idioma, incluso durante el partido.
 
 Novedades
-Nuevo nombre, Padel al Tanto. Estrena icono y ahora puedes cambiar entre español e inglés desde el reloj. Se recuerda tu elección para el siguiente partido.
+La detección de golpes con el movimiento de la muñeca está desactivada por defecto. Puedes activarla desde Ajustes incluso durante el partido. El reloj recuerda tu elección.
 
 ENGLISH
 
@@ -24,9 +24,9 @@ Keep your padel score on your watch. Use the touchscreen or buttons to score eac
 • Play best-of-three or best-of-five sets, or Americano rounds with a set number of games.
 • Choose advantage, golden point, one advantage before golden point, or two advantages before golden point (Star Point). Save your settings as presets.
 • Review your last five entries. Save a full or partial match as a padel activity and sync it to Garmin Connect.
-• See your heart rate when sensor data is available. Wear the watch on your racket arm for an estimated stroke count based on wrist movement.
+• See your heart rate when sensor data is available. To estimate your stroke count, turn on Settings → Stroke detection and wear the watch on your racket arm.
 
 Compatible with 47 mm Garmin fēnix 7 and fēnix 7 Pro models, including the Pro Sapphire Solar edition. Scoring runs on the watch during play. The app starts in Spanish on a Spanish-language watch and in English on all other watches. You can change this in Settings → Language, even during a match.
 
 What's New
-New name, Padel al Tanto. New watch icon. Switch between English and Spanish on your watch. Your choice is remembered for the next match.
+Wrist-based stroke detection is off by default. You can turn it on in Settings, including during a match. The watch remembers your choice.

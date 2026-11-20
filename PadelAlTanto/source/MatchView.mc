@@ -9,6 +9,7 @@ import Toybox.WatchUi;
 
 enum MatchPage { HOME, READY, PLAYING, OPTIONS, SETTINGS, RULES, ROUND_OVER, ROUND_READY, MATCH_OVER, HISTORY, CONFIRM_SAVE, SAVE_FAILED, CONFIRM_EXIT, FINISHED, LANGUAGE }
 enum PointVibration { RALLY_VIBRATION, GAME_VIBRATION, ROUND_VIBRATION, SET_VIBRATION, MATCH_VIBRATION }
+enum SettingsItem { TOUCH_SETTING, LANGUAGE_SETTING, STROKE_SETTING }
 
 class MatchView extends WatchUi.View {
     var page = HOME;
@@ -20,13 +21,14 @@ class MatchView extends WatchUi.View {
     var height = 260;
     var resultIndex = 0;
     var ruleChoice = -1;
-    var settingsLanguageFocused = false;
+    var settingsFocus = TOUCH_SETTING;
     var languageChoiceEnglish = false;
     var setupName as String = "";
     var nextFirst = 0;
     private var width = 260;
     private var automaticSetupName = false;
     private var languageSaveFailed = false;
+    private var strokeSettingSaveFailed = false;
     private var settingsReturn = HOME;
     private var saveReturn = PLAYING;
     private var historyReturn = PLAYING;
@@ -46,6 +48,7 @@ class MatchView extends WatchUi.View {
         score.configureBestOf(3);
         score.setRule(0);
         recording = new MatchRecording();
+        recording.setStrokeDetection(Application.Storage.getValue("strokeDetection") == true);
         previousHistoryAvailable = savedPointHistory().size() > 0;
         touchOn = Application.Storage.getValue("pointTouch") != false;
         var savedRule = Application.Storage.getValue("deuceRule");
@@ -116,20 +119,28 @@ class MatchView extends WatchUi.View {
     }
     function showSettings() {
         settingsReturn = page;
-        settingsLanguageFocused = false;
+        settingsFocus = TOUCH_SETTING;
+        strokeSettingSaveFailed = false;
         page = SETTINGS;
     }
     function closeSettings() {
         page = settingsReturn;
     }
-    function activateSetting(language as Boolean) as Void {
-        settingsLanguageFocused = language;
-        if (language) {
-            languageChoiceEnglish = PadelLanguage.isEnglish();
-            languageSaveFailed = false;
-            page = LANGUAGE;
-        } else {
-            toggleTouch();
+    function moveSettingFocus(direction as Number) as Void {
+        var next = settingsFocus + direction;
+        if (next >= TOUCH_SETTING && next <= STROKE_SETTING) { settingsFocus = next; }
+    }
+    function activateSetting(index as Number) as Void {
+        settingsFocus = index;
+        strokeSettingSaveFailed = false;
+        switch (index) {
+            case TOUCH_SETTING: toggleTouch(); break;
+            case LANGUAGE_SETTING:
+                languageChoiceEnglish = PadelLanguage.isEnglish();
+                languageSaveFailed = false;
+                page = LANGUAGE;
+                break;
+            case STROKE_SETTING: toggleStrokeDetection(); break;
         }
     }
     function selectLanguage(english as Boolean) as Void {
@@ -173,6 +184,19 @@ class MatchView extends WatchUi.View {
         touchOn = !touchOn;
         applyTouchSetting();
         Application.Storage.setValue("pointTouch", touchOn);
+    }
+    private function toggleStrokeDetection() as Void {
+        if (recording.strokeDetectionOn) {
+            recording.setStrokeDetection(false);
+            Application.Storage.deleteValue("strokeDetection");
+            return;
+        }
+        try {
+            Application.Storage.setValue("strokeDetection", true);
+            recording.setStrokeDetection(true);
+        } catch (error instanceof Lang.StorageFullException) {
+            strokeSettingSaveFailed = true;
+        }
     }
     private function applyTouchSetting() {
         if (WatchUi has :configureTouchEvents) {
@@ -295,7 +319,7 @@ class MatchView extends WatchUi.View {
     function divider() { return yAt(50); }
     function lowerEdge() { return yAt(83); }
     function menuY(index) { return yAt(32 + index * 15); }
-    function settingY(language as Boolean) { return yAt(language ? 65 : 45); }
+    function settingY(index as Number) { return yAt(32 + index * 15); }
     function languageY(english as Boolean) { return yAt(english ? 57 : 34); }
     function ruleY(rule) { return yAt(31 + (rule + 1) * 11); }
     function roundActionY(index) {
@@ -366,9 +390,12 @@ class MatchView extends WatchUi.View {
         var accent = Graphics.COLOR_YELLOW;
         var info = Activity.getActivityInfo();
         var bpm = info != null && info.currentHeartRate != null ? info.currentHeartRate.toString() : "--";
-        var strokes = recording.strokes.available ? recording.strokes.count.toString() : "--";
-        center(dc, yAt(10), Graphics.FONT_XTINY,
-            bpm + tr(" lpm  ·  ~", " bpm  ·  ~") + strokes + tr(" golpes", " hits"), white);
+        var header = bpm + tr(" lpm", " bpm");
+        if (recording.strokeDetectionOn) {
+            var strokes = recording.strokes.available ? recording.strokes.count.toString() : "--";
+            header += "  ·  ~" + strokes + tr(" golpes", " hits");
+        }
+        center(dc, yAt(10), Graphics.FONT_XTINY, header, white);
         var serving = score.server(first);
         row(dc, serving, true);
         var deciding = !score.gamesOnly && score.isDecidingPoint();
@@ -460,14 +487,21 @@ class MatchView extends WatchUi.View {
         var white = Graphics.COLOR_WHITE;
         var accent = Graphics.COLOR_YELLOW;
         center(dc, yAt(17), Graphics.FONT_SMALL, tr("Ajustes", "Settings"), accent);
-        var touchSetting = touchOn ? tr("Pantalla táctil · Sí", "Touchscreen · On") : tr("Pantalla táctil · No", "Touchscreen · Off");
+        var touchSetting = tr("Pantalla táctil · ", "Touchscreen · ") + settingState(touchOn);
         var languageSetting = tr("Idioma · ", "Language · ") + languageName(PadelLanguage.isEnglish());
-        center(dc, settingY(false), Graphics.FONT_TINY,
-            (settingsLanguageFocused ? "" : "› ") + touchSetting, settingsLanguageFocused ? white : accent);
-        center(dc, settingY(true), Graphics.FONT_TINY,
-            (settingsLanguageFocused ? "› " : "") + languageSetting, settingsLanguageFocused ? accent : white);
-        center(dc, yAt(76), Graphics.FONT_XTINY, tr("START   Elegir", "START   Select"), white);
+        var strokeSetting = tr("Detección de golpes · ", "Stroke detection · ") + settingState(recording.strokeDetectionOn);
+        var settings = [touchSetting, languageSetting, strokeSetting];
+        for (var index = TOUCH_SETTING; index <= STROKE_SETTING; index++) {
+            var focused = settingsFocus == index;
+            center(dc, settingY(index), Graphics.FONT_TINY, (focused ? "› " : "") + settings[index], focused ? accent : white);
+        }
+        var action = strokeSettingSaveFailed && settingsFocus == STROKE_SETTING
+            ? tr("Sin espacio · START reintenta", "Storage full · START retries") : tr("START   Elegir", "START   Select");
+        center(dc, yAt(76), Graphics.FONT_XTINY, action, white);
         center(dc, yAt(86), Graphics.FONT_XTINY, tr("BACK   Volver", "BACK   Return"), white);
+    }
+    private function settingState(enabled as Boolean) as String {
+        return enabled ? tr("Sí", "On") : tr("No", "Off");
     }
     private function languageName(english as Boolean) as String {
         return english ? "English" : "Español";
@@ -561,8 +595,13 @@ class MatchView extends WatchUi.View {
         else if (resultIndex == resultCount()) { line = "Sets   " + score.sets[0] + " - " + score.sets[1]; }
         else { line = "Set " + (resultIndex + 1) + "   " + score.setScores[resultIndex]; }
         center(dc, yAt(48), americano ? Graphics.FONT_TINY : Graphics.FONT_SMALL, line, white);
-        var strokes = recording.strokes.available ? "~" + recording.strokes.count + tr(" golpes", " hits") : tr("Golpes sin datos", "No hit data");
-        center(dc, yAt(62), Graphics.FONT_XTINY, drawsIncompleteRound() ? tr("Ronda incompleta", "Incomplete round") : strokes, white);
+        if (drawsIncompleteRound()) {
+            center(dc, yAt(62), Graphics.FONT_XTINY, tr("Ronda incompleta", "Incomplete round"), white);
+        } else if (recording.strokes.available) {
+            center(dc, yAt(62), Graphics.FONT_XTINY, "~" + recording.strokes.count + tr(" golpes", " hits"), white);
+        } else if (recording.strokeDetectionOn) {
+            center(dc, yAt(62), Graphics.FONT_XTINY, tr("Golpes sin datos", "No hit data"), white);
+        }
         center(dc, yAt(73), Graphics.FONT_XTINY, tr("UP / DOWN   Parciales", "UP / DOWN   Results"), white);
         center(dc, yAt(83), Graphics.FONT_XTINY, tr("START   Historial", "START   History"), accent);
         center(dc, yAt(92), Graphics.FONT_XTINY, tr("BACK   Salir", "BACK   Exit"), white);
@@ -641,8 +680,9 @@ class MatchInput extends WatchUi.InputDelegate {
             else if (k == WatchUi.KEY_ENTER) { view.page = OPTIONS; view.menuFocus = 0; }
             else if (k == WatchUi.KEY_MENU) { view.showSettings(); }
         } else if (view.page == SETTINGS) {
-            if (k == WatchUi.KEY_UP || k == WatchUi.KEY_DOWN) { view.settingsLanguageFocused = k == WatchUi.KEY_DOWN; }
-            else if (k == WatchUi.KEY_ENTER) { view.activateSetting(view.settingsLanguageFocused); }
+            if (k == WatchUi.KEY_UP) { view.moveSettingFocus(-1); }
+            else if (k == WatchUi.KEY_DOWN) { view.moveSettingFocus(1); }
+            else if (k == WatchUi.KEY_ENTER) { view.activateSetting(view.settingsFocus); }
             else if (k == WatchUi.KEY_ESC) { view.closeSettings(); }
         } else if (view.page == LANGUAGE) {
             if (k == WatchUi.KEY_UP || k == WatchUi.KEY_DOWN) { view.languageChoiceEnglish = k == WatchUi.KEY_DOWN; }
@@ -722,13 +762,12 @@ class MatchInput extends WatchUi.InputDelegate {
                 }
             }
         } else if (view.page == SETTINGS) {
-            if (view.hitRow(y, view.settingY(false))) {
-                view.settingsLanguageFocused = false;
-                return handleKey(WatchUi.KEY_ENTER);
-            }
-            if (view.hitRow(y, view.settingY(true))) {
-                view.settingsLanguageFocused = true;
-                return handleKey(WatchUi.KEY_ENTER);
+            for (var index = TOUCH_SETTING; index <= STROKE_SETTING; index++) {
+                if (view.hitRow(y, view.settingY(index))) {
+                    view.activateSetting(index);
+                    WatchUi.requestUpdate();
+                    return true;
+                }
             }
             if (view.hitRow(y, view.yAt(76))) { return handleKey(WatchUi.KEY_ENTER); }
             if (view.hitRow(y, view.yAt(86))) { return handleKey(WatchUi.KEY_ESC); }

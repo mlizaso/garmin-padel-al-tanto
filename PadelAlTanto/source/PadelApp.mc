@@ -30,10 +30,23 @@ class MatchRecording {
     var result;
     var rounds;
     var strokes;
+    var strokeDetectionOn as Boolean = false;
     function initialize() {
         strokes = new StrokeCounter();
     }
+    function setStrokeDetection(enabled as Boolean) as Void {
+        strokeDetectionOn = enabled;
+        if (!enabled) {
+            strokes.stop();
+        } else if (session != null && session.isRecording()) {
+            strokes.start();
+        }
+    }
     function begin(gameLimit as Number) {
+        if (session != null) { return false; }
+        strokes.count = 0;
+        strokes.available = false;
+        hits = null;
         try { Sensor.setEnabledSensors([Sensor.SENSOR_HEARTRATE]); } catch (e) { }
         try {
             session = ActivityRecording.createSession({
@@ -50,9 +63,8 @@ class MatchRecording {
                 result = session.createField("set_scores", 3, FitContributor.DATA_TYPE_STRING,
                     { :mesgType => FitContributor.MESG_TYPE_SESSION, :count => 48 });
             }
-            hits = field("estimated_strokes", 2);
             if (session.start()) {
-                strokes.start();
+                if (strokeDetectionOn) { strokes.start(); }
                 return true;
             }
             System.println("Pádel: la sesión no ha podido iniciarse.");
@@ -73,6 +85,15 @@ class MatchRecording {
         return session.createField(name, id, FitContributor.DATA_TYPE_UINT16,
             { :mesgType => FitContributor.MESG_TYPE_SESSION });
     }
+    private function saveStrokes() as Void {
+        if (!strokes.available) { return; }
+        try {
+            if (hits == null) { hits = field("estimated_strokes", 2); }
+            hits.setData(strokes.count);
+        } catch (e) {
+            System.println("Pádel: no se pudo incluir la estimación de golpes.");
+        }
+    }
     function save(score as PadelScore) {
         if (session == null) { return false; }
         try {
@@ -83,7 +104,7 @@ class MatchRecording {
                     us.setData(score.sets[0]);
                     them.setData(score.sets[1]);
                 }
-                if (strokes.available) { hits.setData(strokes.count); }
+                saveStrokes();
                 result.setData(fitResultText(score));
                 if (!session.stop()) { return false; }
                 strokes.stop();

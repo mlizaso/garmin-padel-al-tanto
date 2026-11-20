@@ -38,6 +38,6 @@ if __name__ == "__main__":
     parser.add_argument("destino", nargs="?", default=root.parents[1] / "Manual-visual-Padel-al-Tanto.pdf", type=Path)
     parser.add_argument("--font-dir", default=FONTS, type=Path, help="Carpeta con las fuentes Arial")
     args = parser.parse_args()
-    build(pages, root / "shots", args.destino, font_dir=args.font_dir)
+    build(pages, root / "shots", args.destino, cover_screen="play30_strokes_off", font_dir=args.font_dir)
     print(f"{len(pages)} páginas de instrucciones, {sum(len(p['steps']) for p in pages)} tarjetas, "
           f"{len({step[0] for p in pages for step in p['steps']})} capturas distintas.")

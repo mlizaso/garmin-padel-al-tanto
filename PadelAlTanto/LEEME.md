@@ -1,8 +1,8 @@
-# Padel al Tanto · Versión 0.7.0
+# Padel al Tanto · Versión 0.8.0
 
 [Abrir el manual visual en PDF](../Manual-visual-Padel-al-Tanto.pdf)
 
-Aplicación de reloj para el Garmin fēnix 7 estándar de 47 mm (`fenix7`) y el fēnix 7 Pro de 47 mm (`fenix7pro`), incluida la edición Pro Sapphire Solar. Toda la puntuación y la detección de movimientos se realizan en el reloj.
+Aplicación de reloj para el Garmin fēnix 7 estándar de 47 mm (`fenix7`) y el fēnix 7 Pro de 47 mm (`fenix7pro`), incluida la edición Pro Sapphire Solar. El marcador funciona en el reloj. También puedes activar la estimación de golpes a partir del movimiento de la muñeca.
 
 ## Probar en el simulador
 
@@ -26,6 +26,7 @@ En el inicio de Padel al Tanto verás **Jugar**, **Plantillas** y **Ajustes** (*
 * **Jugar** te lleva a **Primer saque**. Elige la pareja y pulsa START para empezar la grabación.
 * **Plantillas** reúne el formato de partido, el americano, las reglas y la configuración manual.
 * **Ajustes → Pantalla táctil** guarda tu preferencia para toda la aplicación. Toca la fila **Pantalla táctil** o selecciónala con UP/DOWN y pulsa START para alternar entre **Sí** y **No**. Con el táctil desactivado, usa los botones físicos. Las plantillas conservan esta preferencia al cambiar de formato.
+* **Ajustes → Detección de golpes** activa o desactiva la estimación de golpes. La opción empieza desactivada y el reloj recuerda el estado que elijas.
 
 Con la pantalla táctil activada, desliza desde el borde derecho hacia la izquierda para hacer lo mismo que BACK. También puedes deslizar en sentido contrario. En un menú vuelves un nivel, al editar un nombre cancelas la edición y en el marcador deshaces la última anotación. Un deslizamiento vertical en el marcador conserva el tanteo.
 
@@ -80,7 +81,7 @@ En la pantalla de **ronda completa**, BACK deshace la última anotación (punto 
 | Punto para la pareja al saque | UP o un toque en la fila superior, marcada **SAQUE**. |
 | Punto para la pareja al resto | DOWN o un toque en la fila inferior. |
 | Restar a una pareja | Con el táctil activo, toca el botón de restar (−) de su fila. Se quita su último punto del juego actual, aunque la otra pareja haya puntuado después. Justo al terminar un juego o set, tocar el botón de restar de la pareja ganadora permite reabrirlo. |
-| Deshacer | BACK vuelve al punto anterior. Se puede repetir, incluso al cambiar de juego o de set. Las pulsaciones y los golpes siguen registrándose. |
+| Deshacer | BACK vuelve al punto anterior. Se puede repetir, incluso al cambiar de juego o de set. La grabación de la actividad sigue en marcha. |
 | Ver los últimos cinco puntos o juegos | Durante el juego, toca **Historial** abajo a la izquierda o pulsa START y elige **Historial**. Al cerrarse una ronda o un partido también puedes pulsar UP. |
 | Bloquear o activar los toques | En el inicio elige **Ajustes**. Durante el partido, pulsa START y elige **Ajustes**, la primera fila. Selecciona **Pantalla táctil** y pulsa START para cambiar su estado. |
 | Terminar | Pulsa START, elige **Terminar partido** y confirma con START. BACK desde la confirmación vuelve al marcador. |
@@ -109,13 +110,15 @@ Un set se gana al llegar al menos a seis juegos con dos de diferencia. En 6–6 
 
 ## Pulsaciones, resultado y estimación de golpes
 
-En la cabecera verás las pulsaciones por minuto y los golpes estimados. Dos guiones indican que todavía no han llegado datos. Al guardar, el reloj crea una actividad de pádel en formato FIT. Sincroniza con Garmin Connect para revisar la duración y la curva de frecuencia cardíaca. En un partido normal se exportan los sets y los parciales; en americano, el número de rondas completas y sus resultados por orden. Si hubo muestras del acelerómetro también se guarda la estimación de golpes. El asterisco indica un parcial incompleto. Cuando el texto supera el espacio del campo FIT se conservan los parciales más recientes con «...» al principio.
+En la cabecera el reloj muestra las pulsaciones por minuto cuando hay datos disponibles. Para ver también los golpes estimados, abre **Ajustes → Detección de golpes** (**Settings → Stroke detection** en inglés). Toca esa fila o selecciónala con UP/DOWN y pulsa START para cambiar a **Sí**. Durante el partido, abre el mismo ajuste con **START → Ajustes**. La detección empieza a partir del momento en que la activas. Si la apagas, el reloj deja de leer el movimiento y conserva el recuento acumulado de la sesión. El tiempo y el pulso disponible se registran independientemente de este ajuste. Dos guiones indican que todavía faltan datos del sensor.
+
+Al guardar, el reloj crea una actividad de pádel en formato FIT. Sincroniza con Garmin Connect para revisar la duración y la curva de frecuencia cardíaca cuando haya datos. En un partido normal se exportan los sets y los parciales. En americano, se exportan el número de rondas completas y los parciales por orden. Si hubo muestras válidas con la detección activa, el reloj guarda también la estimación de golpes. El asterisco indica un parcial incompleto. Cuando el texto supera el espacio del campo FIT se conservan los parciales más recientes con «...» al principio.
 
 En una instalación manual de desarrollo, Garmin Connect puede ocultar los campos personalizados aunque estén en el FIT. Puedes consultar el tanteo y los golpes en el reloj antes de salir del resumen. Para inspeccionar el archivo, exporta el original de la actividad desde Garmin Connect web.
 
 El contador estima **movimientos de tu brazo de pala**. Usa el acelerómetro a 25 Hz y busca ráfagas breves con un pico de aceleración, independientemente de la orientación de la muñeca. Una volea corta puede pasar inadvertida y un gesto rápido sin pelota puede sumar. Los golpes estimados nunca cambian el marcador.
 
-**Primera prueba en pista.** Lleva el reloj en el brazo de la pala. Antes de jugar, deja el brazo quieto unos segundos y anota el valor inicial. Cuenta 20 golpes reales, espera dos segundos después del último y compara el incremento. Prueba después con unos pasos y varios gestos sin pelota para ver cuántos registra de más. Para validar el marcador, cierra un juego, pulsa BACK y comprueba que recuperas tanto la puntuación como la pareja al saque.
+**Primera prueba en pista.** Activa la detección de golpes y lleva el reloj en el brazo de la pala. Antes de jugar, deja el brazo quieto unos segundos y anota el valor inicial. Cuenta 20 golpes reales, espera dos segundos después del último y compara el incremento. Prueba después con unos pasos y varios gestos sin pelota para ver cuántos registra de más. Para validar el marcador, cierra un juego, pulsa BACK y comprueba que recuperas tanto la puntuación como la pareja al saque.
 
 [API de sensores y acelerómetro](https://developer.garmin.com/connect-iq/api-docs/Toybox/Sensor.html) · [Grabación de actividad](https://developer.garmin.com/connect-iq/api-docs/Toybox/ActivityRecording.html) · [Campos FIT](https://developer.garmin.com/connect-iq/api-docs/Toybox/FitContributor.html)
 

@@ -14,7 +14,7 @@ pages = [
     },
     {
         "title": "Leer un 30–30 y sumar con un toque",
-        "intro": "La fila amarilla marcada «SAQUE» identifica a la pareja que sirve en ese momento.",
+        "intro": "La fila amarilla marcada «SAQUE» identifica a la pareja que sirve. En este ejemplo, la detección de golpes está activada.",
         "steps": [
             ("play30", ('read', 182, 54), "Lee las dos filas",
              'En este ejemplo saca nuestra pareja y vamos 30–30. Las cifras grandes son los puntos del juego. A la derecha ves los juegos y los sets de cada pareja.'),
