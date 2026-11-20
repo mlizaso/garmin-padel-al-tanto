@@ -146,7 +146,7 @@ function changeLanguageFromHomeAndDuringRecording(logger as Test.Logger) as Bool
         input.handleKey(WatchUi.KEY_ESC);
         Test.assertEqual(HOME, view.page);
 
-        input.tapAt(130, view.menuY(0));
+        view.applySetup(new PadelTemplate("", 0, 3, 0, false, false));
         input.handleKey(WatchUi.KEY_ENTER);
         Test.assertEqual(PLAYING, view.page);
         var session = view.recording.session;
