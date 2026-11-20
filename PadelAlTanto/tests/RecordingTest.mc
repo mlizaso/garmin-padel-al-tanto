@@ -4,6 +4,19 @@ import Toybox.WatchUi;
 import Toybox.Application.Storage;
 
 (:test)
+function scoreboardShowsLocalClockAndElapsedTime(logger as Test.Logger) as Boolean {
+    Test.assertEqual("00:05", padelClockText(0, 5, true));
+    Test.assertEqual("12:05 AM", padelClockText(0, 5, false));
+    Test.assertEqual("12:00 PM", padelClockText(12, 0, false));
+    Test.assertEqual("3:09 PM", padelClockText(15, 9, false));
+    Test.assertEqual("00:00", padelDurationText(new MatchRecording().elapsedSeconds()));
+    Test.assertEqual("59:59", padelDurationText(3599));
+    Test.assertEqual("1:00:00", padelDurationText(3600));
+    Test.assertEqual("10:07:01", padelDurationText(36421));
+    return true;
+}
+
+(:test)
 function americanoFitKeepsCompletedAndPartialRounds(logger as Test.Logger) as Boolean {
     var score = new PadelScore();
     score.configureFormat(5);
@@ -30,6 +43,20 @@ function normalFitKeepsSetAndPartialGameScore(logger as Test.Logger) as Boolean 
     Test.assertEqual("6-0", fitResultText(score));
     for (var j = 0; j < 4; j++) { score.point(1); }
     Test.assertEqual("6-0 0-1*", fitResultText(score));
+    return true;
+}
+
+(:test)
+function fitKeepsPartialAndCompletedMatchTieBreakScores(logger as Test.Logger) as Boolean {
+    var score = new PadelScore();
+    score.configureBestOf(3);
+    score.configureMatchTieBreak(true);
+    for (var i = 0; i < 48; i += 1) { score.point(i / 24); }
+    Test.assertEqual("6-0 0-6", fitResultText(score));
+    for (var i = 0; i < 4; i += 1) { score.point(i % 2); }
+    Test.assertEqual("6-0 0-6 [2-2]*", fitResultText(score));
+    for (var i = 0; i < 8; i += 1) { score.point(1); }
+    Test.assertEqual("6-0 0-6 [2-10]", fitResultText(score));
     return true;
 }
 

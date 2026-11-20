@@ -107,6 +107,118 @@ function scoreServiceOrder(logger as Test.Logger) as Boolean {
 }
 
 (:test)
+function matchTieBreakReplacesThirdSetAndKeepsServiceOrder(logger as Test.Logger) as Boolean {
+    var score = new PadelScore();
+    score.configureBestOf(3);
+    score.configureMatchTieBreak(true);
+    score.setRule(0);
+    for (var i = 0; i < 6; i += 1) { score.point(i % 2); }
+    score.setRule(-1);
+    score.point(0);
+    Test.assertEqual(1, score.games[0]);
+    for (var i = 0; i < 20; i += 1) { score.point(0); }
+    score.configureMatchTieBreak(false);
+    Test.assert(score.matchTieBreakEnabled);
+    Test.assert(!score.isMatchTieBreak());
+    for (var game = 0; game < 12; game += 1) {
+        for (var rally = 0; rally < 4; rally += 1) { score.point(game % 2); }
+    }
+    Test.assert(score.tieBreak);
+    Test.assert(!score.isMatchTieBreak());
+    for (var i = 0; i < 7; i += 1) { score.point(1); }
+    Test.assert(score.isMatchTieBreak());
+    Test.assert(score.tieBreak);
+    Test.assertEqual("6-7", score.setScores[1]);
+    Test.assertEqual(0, score.games[0] + score.games[1]);
+    Test.assertEqual("0", score.pointsText(1));
+    Test.assert(score.undo());
+    Test.assert(score.tieBreak);
+    Test.assert(!score.isMatchTieBreak());
+    Test.assertEqual("6", score.pointsText(1));
+    Test.assertEqual("6-0", score.setScores[0]);
+    Test.assert(score.point(1));
+
+    score.setRule(0);
+    var servers = [0, 1, 1, 0];
+    for (var i = 0; i < 18; i += 1) {
+        Test.assertEqual(servers[i % 4], score.server(1));
+        Test.assert(score.point(i % 2));
+    }
+    Test.assert(!score.isDecidingPoint());
+    Test.assertEqual("9", score.pointsText(0));
+    Test.assertEqual("9", score.pointsText(1));
+    Test.assert(score.point(0));
+    Test.assert(!score.matchComplete());
+    Test.assert(score.point(1));
+    Test.assert(score.point(0));
+    Test.assert(!score.matchComplete());
+    Test.assert(score.point(0));
+    Test.assert(score.matchComplete());
+    Test.assert(!score.isMatchTieBreak());
+    Test.assert(!score.tieBreak);
+    Test.assertEqual(2, score.sets[0]);
+    Test.assertEqual(1, score.sets[1]);
+    Test.assertEqual("[12-10]", score.setScores[2]);
+    Test.assertEqual("Nos.  Super tie-break [12-10]", score.recentPointRecords()[0]);
+    Test.assert(!score.point(1));
+
+    Test.assert(score.undo());
+    Test.assert(!score.matchComplete());
+    Test.assert(score.isMatchTieBreak());
+    Test.assert(score.tieBreak);
+    Test.assertEqual(2, score.setScores.size());
+    Test.assertEqual("11", score.pointsText(0));
+    Test.assertEqual("10", score.pointsText(1));
+    Test.assertEqual(1, score.server(1));
+    Test.assert(score.removeLastPointFor(1));
+    Test.assert(score.matchComplete());
+    Test.assertEqual("[11-9]", score.setScores[2]);
+    return true;
+}
+
+(:test)
+function gamesOnlyRecordsAndCorrectsMatchTieBreakWinner(logger as Test.Logger) as Boolean {
+    var score = new PadelScore();
+    score.configureBestOf(3);
+    score.configureGamesOnly(true);
+    score.configureMatchTieBreak(true);
+    for (var i = 0; i < 12; i += 1) { Test.assert(score.game(i / 6)); }
+    Test.assert(score.isMatchTieBreak());
+    Test.assert(score.tieBreak);
+    Test.assert(!score.point(1));
+    Test.assert(score.game(1));
+    Test.assert(score.matchComplete());
+    Test.assertEqual(2, score.sets[1]);
+    Test.assertEqual("[L-W]", score.setScores[2]);
+    Test.assertEqual("Riv.  Super tie-break [L-W]", score.recentPointRecords()[0]);
+    Test.assertEqual(tr("Súper TB · Rivales", "Super TB · Opponents"), score.recentPointLines()[0]);
+    Test.assert(!score.game(0));
+    Test.assert(!score.removeLastGameFor(0));
+    Test.assert(score.removeLastGameFor(1));
+    Test.assert(score.isMatchTieBreak());
+    Test.assert(score.tieBreak);
+    Test.assertEqual(0, score.games[0] + score.games[1]);
+    Test.assert(score.game(0));
+    Test.assert(score.matchComplete());
+    Test.assertEqual("[W-L]", score.setScores[2]);
+    Test.assertEqual(tr("Súper TB · Nosotros", "Super TB · Us"), score.recentPointLines()[0]);
+    return true;
+}
+
+(:test)
+function matchTieBreakIsOnlyAvailableForBestOfThreeSets(logger as Test.Logger) as Boolean {
+    var formats = [[0, 0], [0, 1], [0, 5], [5, 3]];
+    for (var i = 0; i < formats.size(); i += 1) {
+        var score = new PadelScore();
+        score.configureFormat(formats[i][0]);
+        score.configureBestOf(formats[i][1]);
+        score.configureMatchTieBreak(true);
+        Test.assert(!score.matchTieBreakEnabled);
+    }
+    return true;
+}
+
+(:test)
 function scoreDecidingPointRules(logger as Test.Logger) as Boolean {
     for (var winner = 0; winner <= 1; winner += 1) {
         for (var rule = 0; rule <= 4; rule += 1) {
@@ -519,6 +631,7 @@ function recentHistoryFollowsLanguageAcrossRoundsAndUndo(logger as Test.Logger) 
     var originalLanguage = Storage.getValue("uiLanguage");
     try {
         PadelLanguage.setEnglish(false);
+        Test.assertEqual("Súper TB · Rivales", padelHistoryLine("Riv.  Super tie-break [L-W]"));
         var score = new PadelScore();
         score.configureFormat(2);
         score.configureGamesOnly(true);
@@ -528,6 +641,7 @@ function recentHistoryFollowsLanguageAcrossRoundsAndUndo(logger as Test.Logger) 
         Test.assertEqual("R1 Riv.  Juegos 1–1", score.recentPointLines()[0]);
 
         PadelLanguage.setEnglish(true);
+        Test.assertEqual("Super TB · Us", padelHistoryLine("Nos.  Super tie-break [W-L]"));
         Test.assertEqual("R1 Opp.  Games 1–1", score.recentPointLines()[0]);
         Test.assert(score.game(0));
         Test.assertEqual("R2 Us  Games 1–0", score.recentPointLines()[0]);

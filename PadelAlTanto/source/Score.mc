@@ -3,19 +3,39 @@ import Toybox.Lang;
 const PADEL_HISTORY_US = "Nos.";
 const PADEL_HISTORY_OPPONENTS = "Riv.";
 const PADEL_HISTORY_GAMES_PREFIX = "Juegos ";
+const PADEL_HISTORY_MATCH_TIE_BREAK_PREFIX = "Super tie-break ";
+const PADEL_MATCH_TIE_BREAK_US_WIN = "[W-L]";
+const PADEL_MATCH_TIE_BREAK_OPPONENTS_WIN = "[L-W]";
+
+function padelSupportsMatchTieBreak(gameLimit as Number, bestOf as Number) as Boolean {
+    return gameLimit == 0 && bestOf == 3;
+}
+
+function padelMatchTieBreakWinnerLabel(result as String) as String? {
+    var winner;
+    if (result.equals(PADEL_MATCH_TIE_BREAK_US_WIN)) { winner = tr("Nosotros", "Us"); }
+    else if (result.equals(PADEL_MATCH_TIE_BREAK_OPPONENTS_WIN)) { winner = tr("Rivales", "Opponents"); }
+    else { return null; }
+    return tr("Súper TB · ", "Super TB · ") + winner;
+}
 
 function padelHistoryLine(record as String) as String {
-    if (!PadelLanguage.isEnglish()) { return record; }
-
     var separator = record.find("  ");
     if (separator == null || separator < 4 || separator + 2 >= record.length()) { return record; }
     var teamStart = separator - 4;
     var team = record.substring(teamStart, separator) as String;
     if (!team.equals(PADEL_HISTORY_US) && !team.equals(PADEL_HISTORY_OPPONENTS)) { return record; }
 
+    var result = record.substring(separator + 2, record.length()) as String;
+    var prefixLength = PADEL_HISTORY_MATCH_TIE_BREAK_PREFIX.length();
+    if (result.find(PADEL_HISTORY_MATCH_TIE_BREAK_PREFIX) == 0 && result.length() > prefixLength) {
+        var winner = padelMatchTieBreakWinnerLabel(result.substring(prefixLength, result.length()) as String);
+        if (winner != null) { return winner; }
+    }
+    if (!PadelLanguage.isEnglish()) { return record; }
+
     var round = teamStart == 0 ? "" : record.substring(0, teamStart) as String;
     var who = team.equals(PADEL_HISTORY_US) ? "Us" : "Opp.";
-    var result = record.substring(separator + 2, record.length()) as String;
     if (result.find(PADEL_HISTORY_GAMES_PREFIX) == 0 && result.length() > PADEL_HISTORY_GAMES_PREFIX.length()) {
         result = "Games " + result.substring(PADEL_HISTORY_GAMES_PREFIX.length(), result.length());
     }
@@ -34,6 +54,7 @@ class PadelScore {
     // Zero leaves normal matches open-ended.
     var bestOf as Number = 0;
     var gamesOnly as Boolean = false;
+    var matchTieBreakEnabled as Boolean = false;
     var completedRounds as Array<String> = [];
     // -1 is unlimited advantage; 0 is golden point at the first deuce.
     var selectedRule as Number = -1;
@@ -90,6 +111,21 @@ class PadelScore {
         if (!formatLocked) {
             gamesOnly = enabled;
         }
+    }
+
+    function configureMatchTieBreak(enabled as Boolean) as Void {
+        if (!formatLocked) {
+            matchTieBreakEnabled = enabled && padelSupportsMatchTieBreak(gameLimit, bestOf);
+        }
+    }
+
+    function isMatchTieBreak() as Boolean {
+        return matchTieBreakEnabled && padelSupportsMatchTieBreak(gameLimit, bestOf) &&
+            sets[0] == 1 && sets[1] == 1;
+    }
+
+    function matchTieBreakPointsText() as String {
+        return "[" + points[0] + "-" + points[1] + "]";
     }
 
     function matchComplete() as Boolean {
@@ -246,7 +282,7 @@ class PadelScore {
         var other = 1 - team;
         var decidingPoint = isDecidingPoint();
         points[team] += 1;
-        var required = tieBreak ? 7 : 4;
+        var required = tieBreak ? (isMatchTieBreak() ? 10 : 7) : 4;
         if (!decidingPoint && (points[team] < required || points[team] - points[other] < 2)) {
             if (recordHistory) {
                 rememberEvent(team, pointsText(0) + "–" + pointsText(1));
@@ -254,11 +290,25 @@ class PadelScore {
             return;
         }
 
-        points = [0, 0];
         applyGame(team, recordHistory);
     }
 
     private function applyGame(team as Number, recordHistory as Boolean) as Void {
+        if (isMatchTieBreak()) {
+            var result = gamesOnly ? (team == 0 ? PADEL_MATCH_TIE_BREAK_US_WIN : PADEL_MATCH_TIE_BREAK_OPPONENTS_WIN) :
+                matchTieBreakPointsText();
+            setScores.add(result);
+            sets[team] += 1;
+            points = [0, 0];
+            tieBreak = false;
+            if (recordHistory) {
+                rememberEvent(team, PADEL_HISTORY_MATCH_TIE_BREAK_PREFIX + result);
+            }
+            return;
+        }
+        if (!gamesOnly) {
+            points = [0, 0];
+        }
         games[team] += 1;
         completedGames += 1;
         var wonSet = gameLimit == 0 && (tieBreak || (games[team] >= 6 && games[team] - games[1 - team] >= 2));
@@ -273,7 +323,7 @@ class PadelScore {
                 rememberEvent(team, result);
             }
             games = [0, 0];
-            tieBreak = false;
+            tieBreak = isMatchTieBreak();
             return;
         }
         if (gameLimit == 0) {

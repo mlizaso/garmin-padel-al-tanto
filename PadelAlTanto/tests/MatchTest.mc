@@ -37,7 +37,7 @@ function openTouchSettingsFromHomeAndReady(logger as Test.Logger) as Boolean {
         Test.assertEqual(SETTINGS, view.page);
         input.handleKey(WatchUi.KEY_ESC);
 
-        input.tapAt(130, view.menuY(0));
+        view.applySetup(new PadelTemplate("", 0, 3, 0, false, false));
         Test.assertEqual(READY, view.page);
         input.handleKey(WatchUi.KEY_DOWN);
         Test.assertEqual(1, view.first);
@@ -189,9 +189,7 @@ function enabledHorizontalSwipesActAsBack(logger as Test.Logger) as Boolean {
     var view = new MatchVibrationTestView();
     var input = new MatchInput(view);
     view.touchOn = true;
-    input.handleKey(WatchUi.KEY_DOWN);
-    input.handleKey(WatchUi.KEY_UP);
-    input.handleKey(WatchUi.KEY_ENTER);
+    view.applySetup(new PadelTemplate("", 0, 3, 0, false, false));
     Test.assertEqual(READY, view.page);
     input.handleKey(WatchUi.KEY_MENU);
     Test.assertEqual(SETTINGS, view.page);
@@ -233,13 +231,21 @@ function recordMatchWithKeysAndTouch(logger as Test.Logger) as Boolean {
     var previousHistory = Application.Storage.getValue("lastScoredPoints");
     var view = new MatchView();
     var input = new MatchInput(view);
-    view.page = READY;
     view.touchOn = true;
     try {
+        view.applySetup(new PadelTemplate("", 0, 3, 0, false, true));
+        Test.assertEqual(READY, view.page);
+        Test.assert(view.score.matchTieBreakEnabled);
+        Test.assert(view.recording.session == null);
         input.handleKey(WatchUi.KEY_DOWN);
-        input.handleKey(WatchUi.KEY_ENTER);
+        Test.assertEqual(1, view.first);
+        Test.assert(view.recording.session == null);
+        input.tapAt(130, view.yAt(86));
         Test.assertEqual(PLAYING, view.page);
         Test.assert(view.recording.session.isRecording());
+        input.tapAt(130, view.yAt(86));
+        Test.assertEqual("0", view.score.pointsText(0));
+        Test.assertEqual("0", view.score.pointsText(1));
         for (var rally = 0; rally < 3; rally++) { input.handleKey(WatchUi.KEY_UP); }
         input.tapAt(130, view.upperEdge() + 12);
         Test.assertEqual(1, view.score.games[1]);
@@ -363,7 +369,7 @@ function recordAmericanoAcrossRounds(logger as Test.Logger) as Boolean {
     view.page = READY;
     view.touchOn = true;
     try {
-        view.applySetup(5, 0, -1, "Americano 5", false);
+        view.applySetup(new PadelTemplate("Americano 5", 5, 0, -1, false, false));
         Test.assertEqual(5, view.score.gameLimit);
         Test.assertEqual("Americano 5", view.setupName);
         Test.assertEqual(READY, view.page);
@@ -488,7 +494,7 @@ function vibrateOnlyForScoredPoints(logger as Test.Logger) as Boolean {
     var input = new MatchInput(view);
     view.page = READY;
     view.touchOn = true;
-    view.applySetup(2, 0, 0, "Dos juegos", false);
+    view.applySetup(new PadelTemplate("Dos juegos", 2, 0, 0, false, false));
     view.page = PLAYING;
 
     input.tapAt(130, view.divider());
@@ -525,7 +531,7 @@ function closeUndoAndSaveBestOfThree(logger as Test.Logger) as Boolean {
     var input = new MatchInput(view);
     view.page = READY;
     view.touchOn = true;
-    view.applySetup(0, 3, 0, "Mejor de 3", false);
+    view.applySetup(new PadelTemplate("Mejor de 3", 0, 3, 0, false, false));
     try {
         input.handleKey(WatchUi.KEY_ENTER);
         Test.assertEqual(PLAYING, view.page);
@@ -584,7 +590,7 @@ function playAndCorrectOnlyGamesWithKeysAndTouch(logger as Test.Logger) as Boole
     var input = new MatchInput(view);
     view.page = READY;
     view.touchOn = true;
-    view.applySetup(2, 0, 0, "Americano rápido", true);
+    view.applySetup(new PadelTemplate("Americano rápido", 2, 0, 0, true, false));
     Test.assert(view.score.gamesOnly);
     view.page = PLAYING;
 
@@ -639,7 +645,7 @@ function finishAndSaveOnlyGamesAfterTiebreak(logger as Test.Logger) as Boolean {
     var input = new MatchInput(view);
     view.page = READY;
     view.touchOn = true;
-    view.applySetup(0, 3, 0, "Solo juegos", true);
+    view.applySetup(new PadelTemplate("Solo juegos", 0, 3, 0, true, false));
     try {
         input.handleKey(WatchUi.KEY_ENTER);
         Test.assertEqual(PLAYING, view.page);

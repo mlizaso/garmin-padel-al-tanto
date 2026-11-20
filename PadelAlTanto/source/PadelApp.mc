@@ -31,6 +31,8 @@ class MatchRecording {
     var rounds;
     var strokes;
     var strokeDetectionOn as Boolean = false;
+    private var startMillis as Number?;
+    private var stoppedSeconds as Number = 0;
     function initialize() {
         strokes = new StrokeCounter();
     }
@@ -64,6 +66,8 @@ class MatchRecording {
                     { :mesgType => FitContributor.MESG_TYPE_SESSION, :count => 48 });
             }
             if (session.start()) {
+                startMillis = System.getTimer();
+                stoppedSeconds = 0;
                 if (strokeDetectionOn) { strokes.start(); }
                 return true;
             }
@@ -77,6 +81,10 @@ class MatchRecording {
         }
         releaseHeartRate();
         return false;
+    }
+    function elapsedSeconds() as Number {
+        var start = startMillis;
+        return start == null ? stoppedSeconds : (System.getTimer() - start) / 1000;
     }
     private function releaseHeartRate() {
         try { Sensor.setEnabledSensors([]); } catch (e) { }
@@ -107,6 +115,8 @@ class MatchRecording {
                 saveStrokes();
                 result.setData(fitResultText(score));
                 if (!session.stop()) { return false; }
+                stoppedSeconds = elapsedSeconds();
+                startMillis = null;
                 strokes.stop();
             }
             if (session.save()) {
@@ -157,7 +167,8 @@ function fitResultText(score as PadelScore) as String {
     var capacity = americano ? 160 : 48;
     var summary = "";
     if (hasCurrentResult(score)) {
-        summary = score.games[0].toString() + "-" + score.games[1].toString();
+        summary = score.isMatchTieBreak() ? score.matchTieBreakPointsText() :
+            score.games[0].toString() + "-" + score.games[1].toString();
         if (!score.roundComplete()) { summary += "*"; }
     }
     // Reserve one byte for NUL and four for the prefix if old scores are omitted.

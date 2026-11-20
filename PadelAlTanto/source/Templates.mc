@@ -30,14 +30,16 @@ class PadelTemplate {
     var bestOf as Number;
     var rule as Number;
     var gamesOnly as Boolean;
+    var matchTieBreakEnabled as Boolean;
 
     function initialize(templateName as String, roundGames as Number, matchSets as Number,
-        deuceRule as Number, countGamesOnly as Boolean) {
+        deuceRule as Number, countGamesOnly as Boolean, matchTieBreak as Boolean) {
         name = templateName;
         games = roundGames;
         bestOf = matchSets;
         rule = deuceRule;
         gamesOnly = countGamesOnly;
+        matchTieBreakEnabled = matchTieBreak && padelSupportsMatchTieBreak(games, bestOf);
     }
 
     function formatLabel() as String {
@@ -69,26 +71,27 @@ class PadelTemplateLibrary {
         // An empty saved list is distinct from the first launch of this menu.
         if (stored == null) {
             entries = [
-                new PadelTemplate("", 0, 3, 0, false),
-                new PadelTemplate("", 7, 0, 0, false),
-                new PadelTemplate("", 5, 0, 0, false),
-                new PadelTemplate("", 0, 3, 1, false)
+                new PadelTemplate("", 0, 3, 0, false, false),
+                new PadelTemplate("", 7, 0, 0, false, false),
+                new PadelTemplate("", 5, 0, 0, false, false),
+                new PadelTemplate("", 0, 3, 1, false, false)
             ];
             persist(entries);
         } else if (stored instanceof Array) {
             for (var i = 0; i < stored.size(); i++) {
                 var row = stored[i];
-                if (row instanceof Array && (row.size() == 4 || row.size() == 5)) {
+                if (row instanceof Array && row.size() >= 4 && row.size() <= 6) {
                     var name = row[0];
                     var games = row[1];
                     var bestOf = row[2];
                     var rule = row[3];
                     // Templates saved before the scoring option counted every point.
-                    var gamesOnly = row.size() == 5 ? row[4] : false;
+                    var gamesOnly = row.size() >= 5 ? row[4] : false;
+                    var matchTieBreak = row.size() == 6 ? row[5] : false;
                     if (name instanceof String && games instanceof Number && games >= 0 && games <= PADEL_MAX_ROUND_GAMES &&
                         bestOf instanceof Number && (bestOf == 0 || bestOf == 1 || bestOf == 3 || bestOf == 5) &&
-                        rule instanceof Number && rule >= -1 && rule <= 2 && gamesOnly instanceof Boolean) {
-                        entries.add(new PadelTemplate(name, games, bestOf, rule, gamesOnly));
+                        rule instanceof Number && rule >= -1 && rule <= 2 && gamesOnly instanceof Boolean && matchTieBreak instanceof Boolean) {
+                        entries.add(new PadelTemplate(name, games, bestOf, rule, gamesOnly, matchTieBreak));
                     }
                 }
             }
@@ -128,7 +131,7 @@ class PadelTemplateLibrary {
         var stored = new Array<Storage.ValueType>[templates.size()];
         for (var i = 0; i < templates.size(); i++) {
             var entry = templates[i];
-            stored[i] = [entry.name, entry.games, entry.bestOf, entry.rule, entry.gamesOnly];
+            stored[i] = [entry.name, entry.games, entry.bestOf, entry.rule, entry.gamesOnly, entry.matchTieBreakEnabled];
         }
         try {
             Storage.setValue(PADEL_TEMPLATES_KEY, stored);
@@ -139,22 +142,23 @@ class PadelTemplateLibrary {
     }
 }
 
-function openPadelSetup(view as MatchView) as Void {
-    new PadelSetup(view).open();
-}
-
 class PadelSetup {
     private var view as MatchView;
     private var library as PadelTemplateLibrary;
+    private var forPlay as Boolean;
     private var selection as Number = 0;
-    private var mode as Symbol = :manual;
+    private var mode as Symbol = :template;
+    private var defaultSetup as PadelTemplate;
     private var draft as PadelTemplate;
     private var roundGames as Number = 7;
 
-    function initialize(matchView as MatchView) {
+    function initialize(matchView as MatchView, play as Boolean) {
         view = matchView;
+        forPlay = play;
         library = new PadelTemplateLibrary();
-        draft = new PadelTemplate("", 0, 3, 0, false);
+        var score = view.score;
+        defaultSetup = new PadelTemplate("", score.gameLimit, score.bestOf, score.selectedRule, score.gamesOnly, score.matchTieBreakEnabled);
+        draft = defaultSetup;
     }
 
     function open() as Void {
@@ -164,7 +168,18 @@ class PadelSetup {
     }
 
     function exitSetup() as Void {
+        if (forPlay) { view.clearPlaySetup(); }
         WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
+    }
+
+    function returnFromServe() as Void {
+        if (mode != :manual) {
+            open();
+            return;
+        }
+        var menu = editorMenu(0);
+        WatchUi.pushView(menu,
+            new PadelSetupMenuInput(menu, view, method(:chooseEditorItem), method(:cancelEditor)), WatchUi.SLIDE_IMMEDIATE);
     }
 
     private function switchMenu(menu as PadelSetupMenu, selected as Method(item as WatchUi.MenuItem) as Void,
@@ -174,18 +189,22 @@ class PadelSetup {
     }
 
     private function libraryMenu() as PadelSetupMenu {
-        var menu = new PadelSetupMenu(library.size() == 0 ? tr("Sin plantillas", "No templates") : tr("Plantillas", "Templates"));
+        var menu = new PadelSetupMenu(forPlay ? tr("Jugar", "Play") : tr("Plantillas", "Templates"));
+        if (forPlay) { menu.addItem(new WatchUi.MenuItem("Manual", null, :manual, {})); }
         for (var i = 0; i < library.size(); i++) {
             var entry = library.get(i);
-            var caption = entry.scoringSummary();
-            if (entry.name.length() > 0) {
-                caption = entry.formatLabel() + " · " + (!entry.gamesOnly && entry.rule == 0 ? tr("Oro", "Gold") : caption);
-            }
+            var named = entry.name.length() > 0;
+            var caption = named && !entry.gamesOnly && entry.rule == 0 ? tr("Oro", "Gold") : entry.scoringSummary();
+            if (entry.matchTieBreakEnabled) { caption = "STB · " + caption; }
+            if (named) { caption = entry.formatLabel() + " · " + caption; }
             menu.addItem(new WatchUi.MenuItem(entry.label(), caption, i, {}));
         }
-        menu.addItem(new WatchUi.MenuItem("Manual", null, :manual, {}));
-        menu.addItem(new WatchUi.MenuItem(tr("Nueva plantilla", "New template"), null, :new, {}));
-        menu.setFocus(selection);
+        if (forPlay) {
+            menu.setFocus(mode == :manual ? 0 : selection + 1);
+        } else {
+            menu.addItem(new WatchUi.MenuItem(tr("Nueva plantilla", "New template"), null, :new, {}));
+            menu.setFocus(selection);
+        }
         return menu;
     }
 
@@ -197,19 +216,28 @@ class PadelSetup {
         var choice = item.getId();
         if (choice instanceof Number) {
             selection = choice;
-            showTemplate();
-        } else {
-            selection = library.size() + (choice == :new ? 1 : 0);
-            var score = view.score;
-            startEditor(choice as Symbol,
-                new PadelTemplate("", score.gameLimit, score.bestOf, score.selectedRule, score.gamesOnly));
+            if (forPlay) {
+                mode = :template;
+                prepareServe(library.get(selection));
+            } else {
+                showTemplate();
+            }
+        } else if (choice == :manual) {
+            startEditor(:manual, defaultSetup);
+        } else if (choice == :new) {
+            selection = library.size();
+            startEditor(:new, defaultSetup);
         }
+    }
+
+    private function prepareServe(entry as PadelTemplate) as Void {
+        view.applySetup(entry);
+        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
     }
 
     function showTemplate() as Void {
         var entry = library.get(selection);
         var menu = new PadelSetupMenu(entry.label());
-        menu.addItem(new WatchUi.MenuItem(tr("Usar plantilla", "Use template"), entry.scoringSummary(), :apply, {}));
         menu.addItem(new WatchUi.MenuItem(tr("Editar", "Edit"), entry.name.length() > 0 ? entry.formatLabel() : null, :edit, {}));
         menu.addItem(new WatchUi.MenuItem(tr("Eliminar", "Delete"), null, :delete, {}));
         switchMenu(menu, method(:chooseTemplateAction), method(:showLibrary));
@@ -218,10 +246,6 @@ class PadelSetup {
     function chooseTemplateAction(item as WatchUi.MenuItem) as Void {
         var entry = library.get(selection);
         switch (item.getId() as Symbol) {
-            case :apply:
-                view.applyTemplateSetup(entry.games, entry.bestOf, entry.rule, entry.name, entry.gamesOnly);
-                exitSetup();
-                break;
             case :edit:
                 startEditor(:edit, entry);
                 break;
@@ -246,12 +270,13 @@ class PadelSetup {
 
     private function startEditor(editorMode as Symbol, entry as PadelTemplate) as Void {
         mode = editorMode;
-        draft = new PadelTemplate(entry.name, entry.games, entry.games > 0 ? 3 : entry.bestOf, entry.rule, entry.gamesOnly);
+        draft = new PadelTemplate(entry.name, entry.games, entry.games > 0 ? 3 : entry.bestOf,
+            entry.rule, entry.gamesOnly, entry.matchTieBreakEnabled);
         roundGames = entry.games > 0 ? entry.games : 7;
         showEditor();
     }
 
-    private function showEditorAt(focus as Number) as Void {
+    private function editorMenu(focus as Number) as PadelSetupMenu {
         var menu = new PadelSetupMenu(mode == :manual ? "Manual" : mode == :new ? tr("Crear", "Create") : tr("Editar", "Edit"));
         var americano = draft.games > 0;
         menu.addItem(new WatchUi.MenuItem(tr("Formato", "Format"), americano ? "Americano" : tr("Pádel por sets", "Padel by sets"), :format, {}));
@@ -264,12 +289,20 @@ class PadelSetup {
         if (!draft.gamesOnly) {
             menu.addItem(new WatchUi.MenuItem(tr("Iguales", "Deuce"), padelRuleLabel(draft.rule), :rule, {}));
         }
+        if (padelSupportsMatchTieBreak(draft.games, draft.bestOf)) {
+            var choice = draft.matchTieBreakEnabled ? tr("Sí", "On") : tr("No", "Off");
+            menu.addItem(new WatchUi.MenuItem("Super tie-break", choice, :matchTieBreak, {}));
+        }
         if (mode != :manual) {
             menu.addItem(new WatchUi.MenuItem(tr("Nombre", "Name"), draft.nameLabel(), :name, {}));
         }
-        menu.addItem(new WatchUi.MenuItem(mode == :manual ? tr("Aplicar", "Apply") : tr("Guardar", "Save"), null, :finish, {}));
+        menu.addItem(new WatchUi.MenuItem(mode == :manual ? tr("Continuar", "Continue") : tr("Guardar", "Save"), null, :finish, {}));
         menu.setFocus(focus);
-        switchMenu(menu, method(:chooseEditorItem), method(:cancelEditor));
+        return menu;
+    }
+
+    private function showEditorAt(focus as Number) as Void {
+        switchMenu(editorMenu(focus), method(:chooseEditorItem), method(:cancelEditor));
     }
 
     function showEditor() as Void {
@@ -297,6 +330,9 @@ class PadelSetup {
                 break;
             case :rule:
                 showRules();
+                break;
+            case :matchTieBreak:
+                showMatchTieBreak();
                 break;
             case :name:
                 var editor = new PadelTemplateNameView(draft.name);
@@ -373,11 +409,24 @@ class PadelSetup {
         showEditorAt(4);
     }
 
+    private function showMatchTieBreak() as Void {
+        var menu = new PadelSetupMenu("Super tie-break");
+        menu.addItem(new WatchUi.MenuItem(tr("No", "Off"), tr("Tercer set", "Third set"), :thirdSet, {}));
+        menu.addItem(new WatchUi.MenuItem(tr("Sí", "On"), tr("A 10 · margen de 2", "To 10 · win by 2"), :superTieBreak, {}));
+        menu.setFocus(draft.matchTieBreakEnabled ? 1 : 0);
+        switchMenu(menu, method(:selectMatchTieBreak), method(:showEditor));
+    }
+
+    function selectMatchTieBreak(item as WatchUi.MenuItem) as Void {
+        draft.matchTieBreakEnabled = item.getId() == :superTieBreak;
+        showEditorAt(draft.gamesOnly ? 3 : 4);
+    }
+
     private function finishEditor() as Void {
-        var entry = new PadelTemplate(draft.name, draft.games, draft.games > 0 ? 0 : draft.bestOf, draft.rule, draft.gamesOnly);
+        var entry = new PadelTemplate(draft.name, draft.games, draft.games > 0 ? 0 : draft.bestOf,
+            draft.rule, draft.gamesOnly, draft.matchTieBreakEnabled);
         if (mode == :manual) {
-            view.applySetup(entry.games, entry.bestOf, entry.rule, "", entry.gamesOnly);
-            exitSetup();
+            prepareServe(entry);
             return;
         }
         var index = mode == :edit ? selection : null;

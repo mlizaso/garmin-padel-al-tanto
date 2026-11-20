@@ -11,6 +11,18 @@ enum MatchPage { HOME, READY, PLAYING, OPTIONS, SETTINGS, RULES, ROUND_OVER, ROU
 enum PointVibration { RALLY_VIBRATION, GAME_VIBRATION, ROUND_VIBRATION, SET_VIBRATION, MATCH_VIBRATION }
 enum SettingsItem { TOUCH_SETTING, LANGUAGE_SETTING, STROKE_SETTING }
 
+function padelClockText(hour as Number, minute as Number, use24Hours as Boolean) as String {
+    if (use24Hours) { return hour.format("%02d") + ":" + minute.format("%02d"); }
+    var hour12 = hour % 12;
+    return (hour12 == 0 ? 12 : hour12).toString() + ":" + minute.format("%02d") + (hour < 12 ? " AM" : " PM");
+}
+
+function padelDurationText(seconds as Number) as String {
+    var minutes = seconds / 60;
+    var prefix = minutes >= 60 ? (minutes / 60).toString() + ":" : "";
+    return prefix + (minutes % 60).format("%02d") + ":" + (seconds % 60).format("%02d");
+}
+
 class MatchView extends WatchUi.View {
     var page = HOME;
     var menuFocus = 0;
@@ -26,7 +38,7 @@ class MatchView extends WatchUi.View {
     var setupName as String = "";
     var nextFirst = 0;
     private var width = 260;
-    private var automaticSetupName = false;
+    private var playSetup as PadelSetup?;
     private var languageSaveFailed = false;
     private var strokeSettingSaveFailed = false;
     private var settingsReturn = HOME;
@@ -72,31 +84,40 @@ class MatchView extends WatchUi.View {
         WatchUi.requestUpdate();
     }
     function begin() {
+        if (page != READY) { return; }
         if (!recording.begin(score.gameLimit)) {
             flash("Error al iniciar", "Could not start");
             messageTicks = 3;
             return;
         }
         messageTicks = 0;
+        clearPlaySetup();
         page = PLAYING;
         applyTouchSetting();
         timer = new Timer.Timer();
         timer.start(method(:tick), 1000, true);
     }
-    function applySetup(games as Number, bestOf as Number, rule as Number, name as String, gamesOnly as Boolean) as Void {
+    function applySetup(entry as PadelTemplate) as Void {
         if (page != HOME && page != READY) { return; }
-        score.configureFormat(games);
-        score.configureBestOf(bestOf);
-        score.configureGamesOnly(gamesOnly);
-        score.setRule(rule);
-        setupName = name;
-        automaticSetupName = false;
+        score.configureFormat(entry.games);
+        score.configureBestOf(entry.bestOf);
+        score.configureGamesOnly(entry.gamesOnly);
+        score.configureMatchTieBreak(entry.matchTieBreakEnabled);
+        score.setRule(entry.rule);
+        setupName = entry.name;
+        first = 0;
+        messageTicks = 0;
         page = READY;
         WatchUi.requestUpdate();
     }
-    function applyTemplateSetup(games as Number, bestOf as Number, rule as Number, name as String, gamesOnly as Boolean) as Void {
-        applySetup(games, bestOf, rule, name, gamesOnly);
-        if (page == READY) { automaticSetupName = name.length() == 0; }
+    function clearPlaySetup() as Void {
+        playSetup = null;
+    }
+    function backFromServe() as Void {
+        page = HOME;
+        menuFocus = 0;
+        var setup = playSetup;
+        if (setup != null) { setup.returnFromServe(); }
     }
     function menuItems() as Array<Symbol> {
         if (page == HOME) {
@@ -109,8 +130,12 @@ class MatchView extends WatchUi.View {
         if (index < 0 || index >= items.size()) { return; }
         menuFocus = index;
         switch (items[index]) {
-            case :play: page = READY; break;
-            case :templates: openPadelSetup(self); break;
+            case :play:
+                var setup = new PadelSetup(self, true);
+                playSetup = setup;
+                setup.open();
+                break;
+            case :templates: new PadelSetup(self, false).open(); break;
             case :settings: showSettings(); break;
             case :rules: showRules(); break;
             case :history: showHistory(); break;
@@ -174,7 +199,6 @@ class MatchView extends WatchUi.View {
     function applyRule() {
         if (score.selectedRule != ruleChoice) {
             setupName = "";
-            automaticSetupName = false;
         }
         score.setRule(ruleChoice);
         Application.Storage.setValue("deuceRule", ruleChoice);
@@ -310,6 +334,7 @@ class MatchView extends WatchUi.View {
         }
     }
     function shutdown() {
+        clearPlaySetup();
         stopTimer();
         if (recording.session != null) { recording.save(score); }
         recording.strokes.stop();
@@ -372,18 +397,46 @@ class MatchView extends WatchUi.View {
             dc.drawCircle(x, y, yAt(5));
             dc.drawLine(x - 5, y, x + 5, y);
         }
-        if (top) { textAt(dc, infoX, y - yAt(14), Graphics.FONT_XTINY, tr("SAQUE", "SERVE"), ink); }
-        var tally = score.gamesOnly ? score.games[team].toString() : score.pointsText(team);
+        var decider = score.isMatchTieBreak();
+        if (top) {
+            var serve = score.gamesOnly && decider ? tr("1.er saque", "1st serve") : tr("SAQUE", "SERVE");
+            textAt(dc, infoX, y - yAt(14), Graphics.FONT_XTINY, serve, ink);
+        }
+        var tally = score.gamesOnly ? (decider ? score.sets[team] : score.games[team]).toString() : score.pointsText(team);
         textAt(dc, width * 39 / 100, y, scoreFont(dc, tally), tally, ink);
         textAt(dc, infoX, y - yAt(6), Graphics.FONT_XTINY, who, ink);
-        if (!score.gamesOnly) {
+        if (!score.gamesOnly && !decider) {
             var gamesY = y + yAt(score.gameLimit > 0 ? 6 : 2);
             textAt(dc, infoX, gamesY, Graphics.FONT_XTINY, tr("Juegos ", "Games ") + score.games[team], Graphics.COLOR_WHITE);
         }
         if (score.gameLimit == 0) {
-            var setsY = y + yAt(score.gamesOnly ? 5 : 10);
-            textAt(dc, infoX, setsY, Graphics.FONT_XTINY, "Sets " + score.sets[team], Graphics.COLOR_WHITE);
+            var setsY = y + yAt(score.gamesOnly || decider ? 5 : 10);
+            var setsLabel = score.gamesOnly && decider ? "Sets" : "Sets " + score.sets[team];
+            textAt(dc, infoX, setsY, Graphics.FONT_XTINY, setsLabel, Graphics.COLOR_WHITE);
         }
+    }
+    private function drawTimes(dc) {
+        var now = System.getClockTime();
+        var clock = padelClockText(now.hour, now.min, System.getDeviceSettings().is24Hour);
+        var duration = padelDurationText(recording.elapsedSeconds());
+        var font = Graphics.FONT_XTINY;
+        var y = yAt(83);
+        var clockWidth = dc.getTextWidthInPixels(clock, font);
+        var durationWidth = dc.getTextWidthInPixels(duration, font);
+        // The clock face and stopwatch remain distinct in either watch time format.
+        var start = (width - clockWidth - durationWidth - 42) / 2;
+        var iconX = start + 6;
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.drawCircle(iconX, y, 5);
+        dc.drawLine(iconX, y, iconX, y - 3);
+        dc.drawLine(iconX, y, iconX + 3, y + 1);
+        textAt(dc, start + 16 + clockWidth / 2, y, font, clock, Graphics.COLOR_WHITE);
+        iconX = start + clockWidth + 32;
+        dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
+        dc.drawCircle(iconX, y + 1, 5);
+        dc.drawLine(iconX - 2, y - 6, iconX + 2, y - 6);
+        dc.drawLine(iconX, y + 1, iconX + 2, y - 2);
+        textAt(dc, start + clockWidth + 42 + durationWidth / 2, y, font, duration, Graphics.COLOR_YELLOW);
     }
     private function drawPlay(dc) {
         var white = Graphics.COLOR_WHITE;
@@ -400,7 +453,13 @@ class MatchView extends WatchUi.View {
         row(dc, serving, true);
         var deciding = !score.gamesOnly && score.isDecidingPoint();
         var decidingLabel = tr("PUNTO DECISIVO", "DECIDING POINT");
-        if (score.gameLimit > 0) {
+        if (messageTicks > 0) {
+            center(dc, divider(), Graphics.FONT_XTINY, tr(messageEs, messageEn), white);
+        } else if (score.isMatchTieBreak()) {
+            center(dc, divider(), Graphics.FONT_XTINY, score.gamesOnly
+                ? tr("SÚPER TB · MARCA GANADOR", "SUPER TB · SCORE WINNER")
+                : tr("SÚPER TIE-BREAK · 10", "MATCH TIEBREAK · 10"), accent);
+        } else if (score.gameLimit > 0) {
             var status = deciding ? decidingLabel : tr("Ronda ", "Round ") + roundNumber();
             var progress = (score.games[0] + score.games[1]) + "/" + score.gameLimit;
             center(dc, divider(), Graphics.FONT_XTINY, status + " · " + progress + (score.gamesOnly ? tr(" juegos", " games") : ""), accent);
@@ -415,9 +474,7 @@ class MatchView extends WatchUi.View {
             dc.drawLine(yAt(8), divider(), dc.getWidth() - yAt(8), divider());
         }
         row(dc, 1 - serving, false);
-        var hint = touchOn ? tr("Táctil sí · (-) resta", "Touch on · (-) subtract") : tr("Táctil no · BACK deshace", "Touch off · BACK undoes");
-        if (score.gamesOnly && touchOn) { hint = tr("Táctil sí · (-) quita juego", "Touch on · (-) remove game"); }
-        center(dc, yAt(84), Graphics.FONT_XTINY, messageTicks > 0 ? tr(messageEs, messageEn) : hint, white);
+        drawTimes(dc);
         textAt(dc, width * 37 / 100, yAt(91), Graphics.FONT_XTINY, tr("Historial", "History"), accent);
         textAt(dc, width * 63 / 100, yAt(91), Graphics.FONT_XTINY, tr("Menú", "Menu"), accent);
     }
@@ -426,14 +483,15 @@ class MatchView extends WatchUi.View {
             return "Americano · " + score.gameLimit + (score.gameLimit == 1 ? tr(" juego", " game") : tr(" juegos", " games"));
         }
         if (score.bestOf == 0) { return tr("Partido normal · libre", "Standard match · open"); }
+        if (score.matchTieBreakEnabled) { return padelSetFormat(score.bestOf) + " · Super tie-break"; }
         return tr("Mejor de ", "Best of ") + score.bestOf + (score.bestOf == 1 ? " set" : " sets");
     }
     private function roundNumber() {
         return score.completedRounds.size() + 1;
     }
     private function setupTitle(dc) {
-        if (!automaticSetupName && setupName.length() == 0) { return tr("Formato del partido", "Match format"); }
-        var label = automaticSetupName ? padelFormatLabel(score.gameLimit, score.bestOf) : setupName;
+        if (setupName.length() == 0) { return tr("Formato del partido", "Match format"); }
+        var label = setupName;
         var suffix = "";
         while (label.length() > 0 && dc.getTextWidthInPixels(label + suffix, Graphics.FONT_XTINY) > width * 9 / 10) {
             label = label.substring(0, label.length() - 1);
@@ -450,8 +508,8 @@ class MatchView extends WatchUi.View {
         center(dc, yAt(57), Graphics.FONT_XTINY, formatName(), white);
         var tracking = score.gamesOnly ? tr("Anotar · Solo juegos", "Scoring · Games only") : tr("Regla · ", "Rule · ") + padelRuleLabel(score.selectedRule);
         center(dc, yAt(66), Graphics.FONT_XTINY, tracking, white);
-        center(dc, yAt(75), Graphics.FONT_XTINY, messageTicks > 0 ? tr(messageEs, messageEn) : tr("START   Iniciar", "START   Begin"), white);
-        center(dc, yAt(86), Graphics.FONT_XTINY, tr("BACK   Inicio", "BACK   Home"), accent);
+        center(dc, yAt(76), Graphics.FONT_XTINY, tr("BACK   Volver", "BACK   Return"), white);
+        center(dc, yAt(86), Graphics.FONT_XTINY, messageTicks > 0 ? tr(messageEs, messageEn) : tr("START   Iniciar", "START   Begin"), accent);
     }
     private function drawServingChoice(dc, selected, usY, themY) {
         var white = Graphics.COLOR_WHITE;
@@ -536,6 +594,7 @@ class MatchView extends WatchUi.View {
         var result = round ? score.games : score.sets;
         var title = round ? tr("Ronda ", "Round ") + roundNumber() + tr(" cerrada", " complete") :
             tr("Partido terminado", "Match complete");
+        center(dc, yAt(8), Graphics.FONT_XTINY, padelDurationText(recording.elapsedSeconds()), white);
         center(dc, yAt(17), Graphics.FONT_SMALL, title, accent);
         center(dc, yAt(30), Graphics.FONT_XTINY, tr("Nosotros  /  Rivales", "Us  /  Opponents"), white);
         center(dc, yAt(44), Graphics.FONT_LARGE, result[0] + " - " + result[1], white);
@@ -588,13 +647,27 @@ class MatchView extends WatchUi.View {
         var white = Graphics.COLOR_WHITE;
         var accent = Graphics.COLOR_YELLOW;
         var americano = score.gameLimit > 0;
+        center(dc, yAt(10), Graphics.FONT_XTINY, tr("Tiempo ", "Time ") + padelDurationText(recording.elapsedSeconds()), white);
         center(dc, yAt(21), Graphics.FONT_XTINY, americano ? tr("Sesión guardada", "Session saved") : tr("Partido guardado", "Match saved"), accent);
         center(dc, yAt(33), Graphics.FONT_XTINY, tr("Nosotros  /  Rivales", "Us  /  Opponents"), white);
         var line;
+        var font = americano ? Graphics.FONT_TINY : Graphics.FONT_SMALL;
         if (americano) { line = americanoResult(); }
         else if (resultIndex == resultCount()) { line = "Sets   " + score.sets[0] + " - " + score.sets[1]; }
-        else { line = "Set " + (resultIndex + 1) + "   " + score.setScores[resultIndex]; }
-        center(dc, yAt(48), americano ? Graphics.FONT_TINY : Graphics.FONT_SMALL, line, white);
+        else {
+            var result = score.setScores[resultIndex];
+            var winner = padelMatchTieBreakWinnerLabel(result);
+            if (winner != null) {
+                line = winner;
+                font = Graphics.FONT_TINY;
+            } else if (result.find("[") == 0) {
+                line = tr("Súper TB · ", "Super TB · ") + result;
+                font = Graphics.FONT_TINY;
+            } else {
+                line = "Set " + (resultIndex + 1) + "   " + result;
+            }
+        }
+        center(dc, yAt(48), font, line, white);
         if (drawsIncompleteRound()) {
             center(dc, yAt(62), Graphics.FONT_XTINY, tr("Ronda incompleta", "Incomplete round"), white);
         } else if (recording.strokes.available) {
@@ -673,7 +746,7 @@ class MatchInput extends WatchUi.InputDelegate {
             else if (k == WatchUi.KEY_DOWN) { view.first = 1; }
             else if (k == WatchUi.KEY_ENTER) { view.begin(); }
             else if (k == WatchUi.KEY_MENU) { view.showSettings(); }
-            else if (k == WatchUi.KEY_ESC) { view.page = HOME; view.menuFocus = 0; }
+            else if (k == WatchUi.KEY_ESC) { view.backFromServe(); }
         } else if (view.page == PLAYING) {
             if (k == WatchUi.KEY_UP || k == WatchUi.KEY_DOWN) { view.addScore(k == WatchUi.KEY_UP); }
             else if (k == WatchUi.KEY_ESC) { view.undo(); }
@@ -749,8 +822,8 @@ class MatchInput extends WatchUi.InputDelegate {
         } else if (view.page == READY) {
             if (view.hitRow(y, view.yAt(27))) { return handleKey(WatchUi.KEY_UP); }
             if (view.hitRow(y, view.yAt(39))) { return handleKey(WatchUi.KEY_DOWN); }
-            if (view.hitRow(y, view.yAt(75))) { return handleKey(WatchUi.KEY_ENTER); }
-            if (view.hitRow(y, view.yAt(86))) { return handleKey(WatchUi.KEY_ESC); }
+            if (view.hitRow(y, view.yAt(76))) { return handleKey(WatchUi.KEY_ESC); }
+            if (y >= view.lowerEdge() && y < view.yAt(89)) { return handleKey(WatchUi.KEY_ENTER); }
         } else if (view.page == HOME || view.page == OPTIONS) {
             if (view.hitRow(y, view.yAt(89))) { return handleKey(WatchUi.KEY_ENTER); }
             var count = view.menuItems().size();
