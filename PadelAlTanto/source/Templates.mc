@@ -188,7 +188,7 @@ class PadelSetup {
         WatchUi.switchToView(menu, new PadelSetupMenuInput(menu, view, selected, back), WatchUi.SLIDE_IMMEDIATE);
     }
 
-    private function libraryMenu() as PadelSetupMenu {
+    function libraryMenu() as PadelSetupMenu {
         var menu = new PadelSetupMenu(forPlay ? tr("Jugar", "Play") : tr("Plantillas", "Templates"));
         if (forPlay) { menu.addItem(new WatchUi.MenuItem("Manual", null, :manual, {})); }
         for (var i = 0; i < library.size(); i++) {
@@ -235,12 +235,16 @@ class PadelSetup {
         WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
     }
 
-    function showTemplate() as Void {
+    function templateMenu() as PadelSetupMenu {
         var entry = library.get(selection);
         var menu = new PadelSetupMenu(entry.label());
         menu.addItem(new WatchUi.MenuItem(tr("Editar", "Edit"), entry.name.length() > 0 ? entry.formatLabel() : null, :edit, {}));
         menu.addItem(new WatchUi.MenuItem(tr("Eliminar", "Delete"), null, :delete, {}));
-        switchMenu(menu, method(:chooseTemplateAction), method(:showLibrary));
+        return menu;
+    }
+
+    function showTemplate() as Void {
+        switchMenu(templateMenu(), method(:chooseTemplateAction), method(:showLibrary));
     }
 
     function chooseTemplateAction(item as WatchUi.MenuItem) as Void {
@@ -276,7 +280,7 @@ class PadelSetup {
         showEditor();
     }
 
-    private function editorMenu(focus as Number) as PadelSetupMenu {
+    function editorMenu(focus as Number) as PadelSetupMenu {
         var menu = new PadelSetupMenu(mode == :manual ? "Manual" : mode == :new ? tr("Crear", "Create") : tr("Editar", "Edit"));
         var americano = draft.games > 0;
         menu.addItem(new WatchUi.MenuItem(tr("Formato", "Format"), americano ? "Americano" : tr("Pádel por sets", "Padel by sets"), :format, {}));

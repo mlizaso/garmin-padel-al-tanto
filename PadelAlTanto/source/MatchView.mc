@@ -125,22 +125,24 @@ class MatchView extends WatchUi.View {
         }
         return score.gamesOnly ? [:settings, :history, :finish] : [:settings, :rules, :history, :finish];
     }
-    function activateMenu(index as Number) as Void {
+    function activateMenu(index as Number) as PadelSetup? {
         var items = menuItems();
-        if (index < 0 || index >= items.size()) { return; }
+        if (index < 0 || index >= items.size()) { return null; }
         menuFocus = index;
         switch (items[index]) {
             case :play:
-                var setup = new PadelSetup(self, true);
-                playSetup = setup;
+            case :templates:
+                var forPlay = items[index] == :play;
+                var setup = new PadelSetup(self, forPlay);
+                if (forPlay) { playSetup = setup; }
                 setup.open();
-                break;
-            case :templates: new PadelSetup(self, false).open(); break;
+                return setup;
             case :settings: showSettings(); break;
             case :rules: showRules(); break;
             case :history: showHistory(); break;
             case :finish: confirmSave(PLAYING); break;
         }
+        return null;
     }
     function showSettings() {
         settingsReturn = page;

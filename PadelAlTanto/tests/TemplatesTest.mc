@@ -11,50 +11,51 @@ function playSelectorOffersSavedTemplatesAndManual(logger as Test.Logger) as Boo
         saved[0] = ["Club", 7, 0, 1, true, false];
         Storage.setValue(PADEL_TEMPLATES_KEY, saved);
         var view = new MatchView();
-        var input = new MatchInput(view);
 
-        input.handleKey(WatchUi.KEY_ENTER);
-        var selector = currentSetupMenu();
+        Test.assertEqual(:play, view.menuItems()[0]);
+        var play = view.activateMenu(0) as PadelSetup;
+        var selector = play.libraryMenu();
         Test.assertEqual(HOME, view.page);
-        Test.assertEqual("Club", (selector[0].focusedItem() as WatchUi.MenuItem).getLabel());
-        selector[1].handleKey(WatchUi.KEY_UP);
-        Test.assertEqual(:manual, (selector[0].focusedItem() as WatchUi.MenuItem).getId());
-        selector[1].handleKey(WatchUi.KEY_DOWN);
-        selector[1].handleKey(WatchUi.KEY_ENTER);
+        Test.assertEqual("Club", (selector.focusedItem() as WatchUi.MenuItem).getLabel());
+        selector.move(-1);
+        Test.assertEqual(:manual, (selector.focusedItem() as WatchUi.MenuItem).getId());
+        selector.move(1);
+        play.chooseLibraryItem(selector.focusedItem() as WatchUi.MenuItem);
         Test.assertEqual(READY, view.page);
         Test.assertEqual("Club", view.setupName);
         Test.assertEqual(7, view.score.gameLimit);
         Test.assert(view.score.gamesOnly);
         Test.assert(view.recording.session == null);
 
-        input.handleKey(WatchUi.KEY_ESC);
-        currentSetupMenu()[1].handleKey(WatchUi.KEY_ESC);
-        input.handleKey(WatchUi.KEY_DOWN);
-        input.handleKey(WatchUi.KEY_ENTER);
-        currentSetupMenu()[1].handleKey(WatchUi.KEY_ENTER);
-        var actions = currentSetupMenu();
+        view.backFromServe();
+        play.exitSetup();
+        Test.assertEqual(:templates, view.menuItems()[1]);
+        var management = view.activateMenu(1) as PadelSetup;
+        var library = management.libraryMenu();
+        management.chooseLibraryItem(library.focusedItem() as WatchUi.MenuItem);
+        var actions = management.templateMenu();
         Test.assertEqual(HOME, view.page);
-        Test.assertEqual(:edit, (actions[0].focusedItem() as WatchUi.MenuItem).getId());
-        actions[1].handleKey(WatchUi.KEY_DOWN);
-        Test.assertEqual(:delete, (actions[0].focusedItem() as WatchUi.MenuItem).getId());
-        actions[1].handleKey(WatchUi.KEY_DOWN);
-        Test.assertEqual(:edit, (actions[0].focusedItem() as WatchUi.MenuItem).getId());
-        actions[1].handleKey(WatchUi.KEY_ESC);
-        currentSetupMenu()[1].handleKey(WatchUi.KEY_ESC);
+        Test.assertEqual(:edit, (actions.focusedItem() as WatchUi.MenuItem).getId());
+        actions.move(1);
+        Test.assertEqual(:delete, (actions.focusedItem() as WatchUi.MenuItem).getId());
+        actions.move(1);
+        Test.assertEqual(:edit, (actions.focusedItem() as WatchUi.MenuItem).getId());
+        management.exitSetup();
 
         Storage.setValue(PADEL_TEMPLATES_KEY, new Array<Storage.ValueType>[0]);
-        input.handleKey(WatchUi.KEY_UP);
-        input.handleKey(WatchUi.KEY_ENTER);
-        var emptySelector = currentSetupMenu();
-        Test.assertEqual(:manual, (emptySelector[0].focusedItem() as WatchUi.MenuItem).getId());
-        emptySelector[1].handleKey(WatchUi.KEY_DOWN);
-        Test.assertEqual(:manual, (emptySelector[0].focusedItem() as WatchUi.MenuItem).getId());
-        emptySelector[1].handleKey(WatchUi.KEY_ENTER);
-        var custom = currentSetupMenu();
-        Test.assertEqual(:format, (custom[0].focusedItem() as WatchUi.MenuItem).getId());
-        custom[1].handleKey(WatchUi.KEY_UP);
-        Test.assertEqual(:finish, (custom[0].focusedItem() as WatchUi.MenuItem).getId());
-        custom[1].handleKey(WatchUi.KEY_ENTER);
+        var manualPlay = view.activateMenu(0) as PadelSetup;
+        var emptySelector = manualPlay.libraryMenu();
+        Test.assertEqual(:manual, (emptySelector.focusedItem() as WatchUi.MenuItem).getId());
+        emptySelector.move(1);
+        Test.assertEqual(:manual, (emptySelector.focusedItem() as WatchUi.MenuItem).getId());
+        manualPlay.chooseLibraryItem(emptySelector.focusedItem() as WatchUi.MenuItem);
+        var custom = manualPlay.editorMenu(0);
+        Test.assertEqual(:format, (custom.focusedItem() as WatchUi.MenuItem).getId());
+        custom.move(-1);
+        var continueItem = custom.focusedItem() as WatchUi.MenuItem;
+        Test.assertEqual(:finish, continueItem.getId());
+        Test.assertEqual(tr("Continuar", "Continue"), continueItem.getLabel());
+        manualPlay.chooseEditorItem(continueItem);
         Test.assertEqual(READY, view.page);
         Test.assertEqual("", view.setupName);
         Test.assertEqual(0, new PadelTemplateLibrary().size());
@@ -62,12 +63,6 @@ function playSelectorOffersSavedTemplatesAndManual(logger as Test.Logger) as Boo
         restoreTemplateStorage(original);
     }
     return true;
-}
-
-function currentSetupMenu() as [PadelSetupMenu, PadelSetupMenuInput] {
-    var current = WatchUi.getCurrentView();
-    Test.assert(current[0] instanceof PadelSetupMenu && current[1] instanceof PadelSetupMenuInput);
-    return current as [PadelSetupMenu, PadelSetupMenuInput];
 }
 
 (:test)
