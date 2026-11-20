@@ -1,0 +1,21 @@
+# Material de trabajo local, SDK de Garmin y datos de pruebas en el reloj.
+/work/
+.env
+.env.*
+*.der
+*.pem
+*.p12
+*.pfx
+*.key
+*.fit
+*.FIT
+*.csv
+__pycache__/
+bin/
+gen/
+*.debug.xml
+.DS_Store
+
+# Los paquetes de distribución se adjuntan a las versiones de GitHub.
+/Padel-al-Tanto-fenix7.zip
+/Tienda/*.iq

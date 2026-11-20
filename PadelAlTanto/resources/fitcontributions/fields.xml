@@ -1,0 +1,8 @@
+<fitContributions>
+    <fitField id="0" displayInActivitySummary="true" sortOrder="0" precision="0" dataLabel="@Strings.Us" unitLabel="@Strings.UnitSets"/>
+    <fitField id="1" displayInActivitySummary="true" sortOrder="1" precision="0" dataLabel="@Strings.Them" unitLabel="@Strings.UnitSets"/>
+    <fitField id="2" displayInActivitySummary="true" sortOrder="2" precision="0" dataLabel="@Strings.Strokes" unitLabel="@Strings.UnitHits"/>
+    <fitField id="3" displayInActivitySummary="true" sortOrder="3" precision="0" dataLabel="@Strings.Result" unitLabel="@Strings.UnitGames"/>
+    <fitField id="4" displayInActivitySummary="true" sortOrder="4" precision="0" dataLabel="@Strings.Rounds" unitLabel="@Strings.UnitRounds"/>
+    <fitField id="5" displayInActivitySummary="true" sortOrder="5" precision="0" dataLabel="@Strings.RoundScores" unitLabel="@Strings.UnitGames"/>
+</fitContributions>

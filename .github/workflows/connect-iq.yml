@@ -1,0 +1,70 @@
+name: Connect IQ
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  devices:
+    name: Read supported watches
+    runs-on: ubuntu-24.04
+    outputs:
+      models: ${{ steps.manifest.outputs.models }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: manifest
+        name: Read model IDs from the app manifest
+        shell: python
+        run: |
+          import json
+          import os
+          import xml.etree.ElementTree as ET
+
+          manifest = ET.parse("PadelAlTanto/manifest.xml")
+          products = manifest.findall(".//{*}products/{*}product")
+          models = [product.attrib["id"] for product in products]
+          if not models or len(set(models)) != len(models):
+              raise SystemExit("Expected a nonempty list of distinct Garmin device IDs")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              print("models=" + json.dumps(models), file=output)
+
+  simulator:
+    name: Build and test (${{ matrix.device }})
+    needs: devices
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        device: ${{ fromJSON(needs.devices.outputs.models) }}
+    env:
+      # Garmin SDK 9.3.0 and the Linux environment with both watch profiles and fonts.
+      SDK_URL: https://developer.garmin.com/downloads/connect-iq/sdks/connectiq-sdk-lin-9.3.0-2026-10-20-95888f262.zip
+      SDK_SHA256: 1653cc98edd70029670a3e3fcd4ad6e746974a8b758a7b736a4e11506dfd8bc8
+      TEST_IMAGE: ghcr.io/matco/connectiq-tester@sha256:f383d71404f76b8803a5dcd5db292b3b2f8c9b7b90f620ee81fb1bd54f4a30df
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download and verify the official SDK
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl --fail --location --retry 3 --silent --show-error "$SDK_URL" -o connectiq.zip
+          echo "$SDK_SHA256  connectiq.zip" | sha256sum --check
+          unzip -q connectiq.zip -d sdk
+      - name: Compile the release and run the tests on the simulator
+        env:
+          DEVICE: ${{ matrix.device }}
+        run: |
+          docker run --rm --init --network none \
+            --volume "$GITHUB_WORKSPACE:/project:ro" \
+            --volume "$RUNNER_TEMP/sdk:/connectiq" \
+            --workdir /project --entrypoint xvfb-run "$TEST_IMAGE" \
+            -a bash scripts/test-device.sh "$DEVICE"

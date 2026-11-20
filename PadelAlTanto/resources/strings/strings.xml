@@ -1,0 +1,13 @@
+<strings>
+    <string id="AppName">Padel al Tanto</string>
+    <string id="Us">Our sets</string>
+    <string id="Them">Opponent sets</string>
+    <string id="Strokes">Estimated strokes</string>
+    <string id="Result">Set scores (us first)</string>
+    <string id="UnitSets">sets</string>
+    <string id="UnitHits">strokes</string>
+    <string id="UnitGames">games</string>
+    <string id="Rounds">Completed rounds</string>
+    <string id="RoundScores">Round scores (us first)</string>
+    <string id="UnitRounds">rounds</string>
+</strings>
